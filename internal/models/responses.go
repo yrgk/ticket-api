@@ -10,4 +10,9 @@ type (
 		Form              interface{}
 		IsDoubleVerify    bool
 	}
+
+	TicketResponse struct {
+		Title     string `json:"title"`
+		QrCodeUrl string `json:"qr_code_url"`
+	}
 )

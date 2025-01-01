@@ -16,9 +16,15 @@ type (
 	}
 
 	Ticket struct {
-		gorm.Model
-		QrCodeUrl string `json:"qr_code_url"`
-		UserId    int    `json:"user_id"`
-		EventId   int    `json:"event_id"`
+		// gorm.Model
+		QrCodeUrl   string `json:"qr_code_url"`
+		UserId      int    `json:"user_id"`
+		EventId     int    `json:"event_id"`
+		IsActivated bool   `json:"is_activated"`
+	}
+
+	Field struct {
+		Name string `bson:"name" json:"name" validate:"required"`
+		Type string `bson:"type" json:"type" validate:"required"`
 	}
 )

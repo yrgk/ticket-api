@@ -13,6 +13,7 @@ type ConfigStruct struct {
 	S3ApiUrl   string
 	BucketName string
 	WebappName string
+	MongoUrl   string
 }
 
 var Config ConfigStruct
@@ -29,6 +30,7 @@ func GetConfig() {
 	S3ApiUrl := os.Getenv("S3_API_URL")
 	BucketName := os.Getenv("BUCKET_NAME")
 	WebappName := os.Getenv("WEBAPP_NAME")
+	MongoUrl := os.Getenv("MONGO_URL")
 
 	Config = ConfigStruct{
 		DSN:        DSN,
@@ -36,5 +38,6 @@ func GetConfig() {
 		S3ApiUrl:   S3ApiUrl,
 		BucketName: BucketName,
 		WebappName: WebappName,
+		MongoUrl:   MongoUrl,
 	}
 }

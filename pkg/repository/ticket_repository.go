@@ -70,3 +70,16 @@ func CreateQrCode(body models.TakeTicketRequest) ([]byte, error) {
 
 	return response, nil
 }
+
+func GetTicket(id int, userId int) models.TicketResponse {
+	var ticket models.TicketResponse
+	postgres.DB.Raw("SELECT e.title, t.qr_code_url FROM events e, tickets t WHERE e.id = ? AND user_id = ?", id, userId).Scan(&ticket)
+
+	return ticket
+}
+
+func VerifyTicket(ticketId, verifierId string) error {
+	// Checking if data is valid
+	// Changing status of Ticket
+	return nil
+}

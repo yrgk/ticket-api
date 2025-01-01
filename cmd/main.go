@@ -3,6 +3,7 @@ package main
 import (
 	"ticket-api/config"
 	"ticket-api/internal/handlers"
+	"ticket-api/pkg/mongo"
 	"ticket-api/pkg/postgres"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,6 +15,8 @@ func main()  {
 	config.GetConfig()
 
 	postgres.ConnectDb()
+
+	mongo.InitMongo()
 
 	app := fiber.New()
 
