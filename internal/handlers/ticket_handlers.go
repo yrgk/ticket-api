@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"strings"
 	"ticket-api/internal/models"
 	"ticket-api/pkg/repository"
+	"ticket-api/pkg/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -22,15 +24,22 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 
 	qrCodeUrl := strings.Trim(string(qrCode), "\"")
 
+	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s", body.UserId, body.EventId, qrCodeUrl))
+
 	ticketBody := models.Ticket{
-		QrCodeUrl: string(qrCodeUrl),
+		QrCodeUrl: qrCodeUrl,
 		UserId:    body.UserId,
 		EventId:   body.EventId,
+		TicketId:  ticketId,
 	}
 
 	if err := repository.TakeTicket(ticketBody); err != nil {
 		return c.Status(fiber.StatusConflict).SendString("event is full")
 	}
+
+	// ADD FORM DATA TO CLICKHOUSE
+
+	// SEND MESSAGE FROM BOT ABOUT TAKING A TICKET
 
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -61,4 +70,12 @@ func VerifyTicketHandler(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusOK)
+}
+
+func GetMyTicketsHandler(c *fiber.Ctx) error {
+	id := c.QueryInt("user_id")
+
+	tickets := repository.GetMyTickets(id)
+
+	return c.JSON(tickets)
 }

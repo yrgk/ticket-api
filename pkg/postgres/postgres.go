@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"ticket-api/config"
-	// "ticket-api/internal/models"
+	"ticket-api/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,8 +18,9 @@ func ConnectDb() {
 	}
 
 	db.AutoMigrate(
-		// models.Event{},
-		// models.Ticket{},
+		models.Event{},
+		models.Ticket{},
+		models.Field{},
 	)
 
 	DB = db

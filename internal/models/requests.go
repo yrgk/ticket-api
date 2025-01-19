@@ -6,6 +6,8 @@ type (
 		Description    string  `json:"description" validate:"required"`
 		IsPaid         bool    `json:"is_paid"`
 		CoverUrl       string  `json:"cover_url" validate:"required"`
+		PageData       string  `json:"page_data"`
+		BasePrice      int     `json:"base_price"`
 		Capacity       int     `json:"capacity" validate:"required"`
 		IsDoubleVerify bool    `json:"is_double_verify"`
 		OrganizatorId  int     `json:"organizator_id" validate:"required"`

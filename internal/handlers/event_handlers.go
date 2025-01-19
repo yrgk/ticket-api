@@ -4,8 +4,8 @@ import (
 	"ticket-api/internal/models"
 	"ticket-api/pkg/repository"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 func GetEventHandler(c *fiber.Ctx) error {
@@ -19,7 +19,14 @@ func GetEventHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 
-	return c.JSON(event)
+	form := repository.GetForm(id)
+
+	response := models.EventResponse{
+		Event: event,
+		Form:  form,
+	}
+
+	return c.JSON(response)
 }
 
 func CreateEventHandler(c *fiber.Ctx) error {
@@ -30,17 +37,14 @@ func CreateEventHandler(c *fiber.Ctx) error {
 
 	validate := validator.New()
 
-	// return c.JSON(body.FormData)
 	err := validate.Struct(body)
 	if err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).SendString(err.Error())
 	}
 
-	return c.JSON(body)
-
 	if err := repository.CreateEvent(body); err != nil {
 		return c.Status(fiber.StatusConflict).JSON(err)
 	}
 
-	return nil
+	return c.SendStatus(fiber.StatusOK)
 }

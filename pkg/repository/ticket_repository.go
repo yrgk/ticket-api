@@ -73,7 +73,7 @@ func CreateQrCode(body models.TakeTicketRequest) ([]byte, error) {
 
 func GetTicket(id int, userId int) models.TicketResponse {
 	var ticket models.TicketResponse
-	postgres.DB.Raw("SELECT e.title, t.qr_code_url FROM events e, tickets t WHERE e.id = ? AND user_id = ?", id, userId).Scan(&ticket)
+	postgres.DB.Raw("SELECT e.title, t.qr_code_url FROM events e, tickets t WHERE e.id = ? AND t.user_id = ?", id, userId).Scan(&ticket)
 
 	return ticket
 }
@@ -81,5 +81,14 @@ func GetTicket(id int, userId int) models.TicketResponse {
 func VerifyTicket(ticketId, verifierId string) error {
 	// Checking if data is valid
 	// Changing status of Ticket
+	postgres.DB.Raw("UPDATE is_activated FROM tickets WHERE ticket_id = ? AND ")
+	// Deleting qr code from s3
 	return nil
+}
+
+func GetMyTickets(id int) []models.Ticket {
+	var tickets []models.Ticket
+	postgres.DB.Raw("SELECT * FROM tickets WHERE user_id = ?", id).Scan(&tickets)
+
+	return tickets
 }
