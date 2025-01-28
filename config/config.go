@@ -8,12 +8,15 @@ import (
 )
 
 type ConfigStruct struct {
-	DSN        string
-	Port       string
-	S3ApiUrl   string
-	BucketName string
-	WebappName string
-	MongoUrl   string
+	DSN               string
+	Port              string
+	S3ApiUrl          string
+	BucketName        string
+	WebappName        string
+	MongoUrl          string
+	YookassaAPIURL    string
+	YooKassaSecretKey string
+	YooKassaShopID    string
 }
 
 var Config ConfigStruct
@@ -31,13 +34,19 @@ func GetConfig() {
 	BucketName := os.Getenv("BUCKET_NAME")
 	WebappName := os.Getenv("WEBAPP_NAME")
 	MongoUrl := os.Getenv("MONGO_URL")
+	YookassaAPIURL := os.Getenv("YOOKASSAAPIURL")
+	YooKassaSecretKey := os.Getenv("YOOKASSASECRETKEY")
+	YookassaShopID := os.Getenv("YOOKASSASHOPID")
 
 	Config = ConfigStruct{
-		DSN:        DSN,
-		Port:       port,
-		S3ApiUrl:   S3ApiUrl,
-		BucketName: BucketName,
-		WebappName: WebappName,
-		MongoUrl:   MongoUrl,
+		DSN:               DSN,
+		Port:              port,
+		S3ApiUrl:          S3ApiUrl,
+		BucketName:        BucketName,
+		WebappName:        WebappName,
+		MongoUrl:          MongoUrl,
+		YookassaAPIURL:    YookassaAPIURL,
+		YooKassaShopID:    YookassaShopID,
+		YooKassaSecretKey: YooKassaSecretKey,
 	}
 }

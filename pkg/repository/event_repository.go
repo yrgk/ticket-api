@@ -2,7 +2,6 @@ package repository
 
 import (
 	"ticket-api/internal/models"
-	"ticket-api/pkg/mongo"
 	"ticket-api/pkg/postgres"
 )
 
@@ -15,15 +14,17 @@ func GetEvent(id int) models.Event {
 
 func CreateEvent(body models.CreateEventRequest) error {
 	event := models.Event{
-		Title:          body.Title,
-		Description:    body.Description,
-		PageData:       body.PageData,
-		IsPaid:         body.IsPaid,
-		CoverUrl:       body.CoverUrl,
-		BasePrice:      body.BasePrice,
-		Capacity:       body.Capacity,
-		IsDoubleVerify: body.IsDoubleVerify,
-		OrganizatorId:  body.OrganizatorId,
+		Title:       body.Title,
+		Description: body.Description,
+		PageData:    body.PageData,
+		IsPaid:      body.IsPaid,
+		CoverUrl:    body.CoverUrl,
+		BasePrice:   body.BasePrice,
+		Capacity:    body.Capacity,
+		StartTime:   body.StartTime,
+		Duration:    (body.Duration),
+		OrganizatorId: body.OrganizatorId,
+		// IsDoubleVerify: body.IsDoubleVerify,
 	}
 
 	if err := postgres.DB.Create(&event).Error; err != nil {
@@ -35,14 +36,6 @@ func CreateEvent(body models.CreateEventRequest) error {
 	}
 
 	if err := postgres.DB.Create(&body.FormData).Error; err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UploadForm(fields []interface{}) error {
-	if _, err := mongo.Collection.InsertMany(mongo.Ctx, fields); err != nil {
 		return err
 	}
 

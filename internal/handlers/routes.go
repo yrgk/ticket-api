@@ -28,4 +28,6 @@ func SetupRoutes(app *fiber.App) {
 
 	// Verify ticket
 	v1.Post("/ticket/verify", VerifyTicketHandler)
+
+	v1.Post("/ticket/pay", PayTicketHandler)
 }

@@ -1,22 +1,26 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type (
 	Event struct {
 		gorm.Model
-		Title             string `json:"title"`
-		Description       string `json:"description"`
-		PageData          string `json:"page_data"`
-		IsPaid            bool   `json:"is_paid"`
-		CoverUrl          string `json:"cover_url"`
-		BasePrice         int    `json:"base_price"`
-		ParticipantsCount int    `gorm:"default:0" json:"participants_count"`
-		Capacity          int    `gorm:"check: participants_count <= capacity" json:"capacity"`
-		IsDoubleVerify    bool   `json:"is_double_verify"`
-		OrganizatorId     int    `json:"organizator_id"`
+		Title             string        `json:"title"`
+		Description       string        `json:"description"`
+		PageData          string        `json:"page_data"`
+		IsPaid            bool          `json:"is_paid"`
+		CoverUrl          string        `json:"cover_url"`
+		BasePrice         int           `json:"base_price"`
+		StartTime         time.Time     `json:"start_time"`
+		Duration          time.Duration `json:"duration"`
+		ParticipantsCount int           `gorm:"default:0" json:"participants_count"`
+		Capacity          int           `gorm:"check: participants_count <= capacity" json:"capacity"`
+		OrganizatorId     int           `json:"organizator_id"`
+		// IsDoubleVerify    bool   `json:"is_double_verify"`
 	}
 
 	Ticket struct {

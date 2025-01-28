@@ -79,9 +79,10 @@ func GetTicket(id int, userId int) models.TicketResponse {
 }
 
 func VerifyTicket(ticketId, verifierId string) error {
-	// Checking if data is valid
 	// Changing status of Ticket
-	postgres.DB.Raw("UPDATE is_activated FROM tickets WHERE ticket_id = ? AND ")
+
+	// SELECT checker_id FROM checkers WHERE event_id = ?
+	postgres.DB.Raw("UPDATE tickets SET is_activated = TRUE WHERE ticket_id = ?", ticketId)
 	// Deleting qr code from s3
 	return nil
 }

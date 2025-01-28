@@ -79,3 +79,7 @@ func GetMyTicketsHandler(c *fiber.Ctx) error {
 
 	return c.JSON(tickets)
 }
+
+func PayTicketHandler(c *fiber.Ctx) error {
+	return nil
+}

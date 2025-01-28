@@ -3,6 +3,7 @@ package main
 import (
 	"ticket-api/config"
 	"ticket-api/internal/handlers"
+	// "ticket-api/pkg/clickhouse"
 	"ticket-api/pkg/postgres"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,6 +17,8 @@ func main()  {
 	postgres.ConnectDb()
 
 	// mongo.InitMongo()
+
+	// clickhouse.InitClickhouse()
 
 	app := fiber.New()
 
