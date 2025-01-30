@@ -20,14 +20,14 @@ func SetupRoutes(app *fiber.App) {
 	// Get ticket
 	v1.Get("/ticket/:id", GetTicketHandler)
 
+	// Check ticket
+	v1.Get("/ticket/check/:ticket_id", CheckTicketHandler)
+
 	// Get my tickets
 	v1.Get("/ticket/my", GetMyTicketsHandler)
 
-	// Check ticket
-	// v1.Get("/")
-
 	// Verify ticket
-	v1.Post("/ticket/verify", VerifyTicketHandler)
+	v1.Post("/ticket/verify", ValidateTicketHandler)
 
 	v1.Post("/ticket/pay", PayTicketHandler)
 }

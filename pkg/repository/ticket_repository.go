@@ -2,8 +2,6 @@ package repository
 
 import (
 	"bytes"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,17 +24,19 @@ func TakeTicket(body models.Ticket) error {
 	return nil
 }
 
-func CreateQrCode(body models.TakeTicketRequest) ([]byte, error) {
-	original := fmt.Sprintf("%d%d%s", body.UserId, body.EventId, time.Now())
-	hash := md5.New()
-	hash.Write([]byte(original))
+func CreateQrCode(body models.TakeTicketRequest, ticketId string) ([]byte, error) {
+	// original := fmt.Sprintf("%d%d%s", body.UserId, body.EventId, time.Now())
+	// hash := md5.New()
+	// hash.Write([]byte(original))
 
-	md5string := hex.EncodeToString(hash.Sum(nil))
-	url := fmt.Sprintf("%s?startapp=check_%s", config.Config.WebappName, md5string)
+	// Only for url
+	// md5string := hex.EncodeToString(hash.Sum(nil))
+
+	url := fmt.Sprintf("%s?startapp=%s", config.Config.WebappName, ticketId)
 
 	data := models.QrRequestData{
 		URL:        url,
-		ObjectName: md5string,
+		ObjectName: ticketId,
 	}
 
 	// Кодирование данных в JSON
@@ -73,12 +73,45 @@ func CreateQrCode(body models.TakeTicketRequest) ([]byte, error) {
 
 func GetTicket(id int, userId int) models.TicketResponse {
 	var ticket models.TicketResponse
-	postgres.DB.Raw("SELECT e.title, t.qr_code_url FROM events e, tickets t WHERE e.id = ? AND t.user_id = ?", id, userId).Scan(&ticket)
+	postgres.DB.Raw("SELECT e.title, t.qr_code_url, t.event_id, t.variety, t.is_activated FROM events e, tickets t WHERE e.id = ? AND t.user_id = ?", id, userId).Scan(&ticket)
 
 	return ticket
 }
 
-func VerifyTicket(ticketId, verifierId string) error {
+func GetTicketForChecking(id string, userId int) models.TicketCheckResponse {
+	var ticket models.TicketCheckResponse
+	postgres.DB.Raw("SELECT variety, is_activated, user_id FROM tickets WHERE ticket_id = ?", id).Scan(&ticket)
+
+	return ticket
+}
+
+func CheckTicket(ticketId string, validatorId int) models.TicketCheckResponse {
+	var ticket models.Ticket
+	postgres.DB.Raw("SELECT * FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
+
+	event := GetEvent(ticket.EventId)
+
+	var validatorIDs []int
+	postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.EventId).Scan(&validatorIDs)
+
+	if validatorId == event.OrganizatorId {
+
+		ticketData := GetTicketForChecking(ticketId, validatorId)
+		return ticketData
+	}
+
+	for _, id := range validatorIDs {
+		if validatorId == id {
+
+			ticketData := GetTicketForChecking(ticketId, validatorId)
+			return ticketData
+		}
+	}
+
+	return models.TicketCheckResponse{}
+}
+
+func ValidateTicket(ticketId, verifierId string) error {
 	// Changing status of Ticket
 
 	// SELECT checker_id FROM checkers WHERE event_id = ?
@@ -92,4 +125,11 @@ func GetMyTickets(id int) []models.Ticket {
 	postgres.DB.Raw("SELECT * FROM tickets WHERE user_id = ?", id).Scan(&tickets)
 
 	return tickets
+}
+
+func CheckValidator(eventId, validatorId int) bool {
+	var validator models.Validator
+	postgres.DB.Raw("SELECT * FROM validators WHERE event_id = ? AND validator_id = ?", eventId, validatorId).Scan(&validator)
+
+	return validator.EventId != 0
 }

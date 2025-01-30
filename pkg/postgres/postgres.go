@@ -21,6 +21,7 @@ func ConnectDb() {
 		models.Event{},
 		models.Ticket{},
 		models.Field{},
+		models.Validator{},
 	)
 
 	DB = db

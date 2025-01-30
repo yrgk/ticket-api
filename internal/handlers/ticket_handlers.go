@@ -6,6 +6,7 @@ import (
 	"ticket-api/internal/models"
 	"ticket-api/pkg/repository"
 	"ticket-api/pkg/utils"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,14 +18,15 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	qrCode, err := repository.CreateQrCode(body)
+	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.EventId, body.Variety, time.Now()))
+
+	qrCode, err := repository.CreateQrCode(body, ticketId)
 	if err != nil {
 		return c.Status(fiber.StatusConflict).SendString(err.Error())
 	}
 
 	qrCodeUrl := strings.Trim(string(qrCode), "\"")
 
-	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s", body.UserId, body.EventId, qrCodeUrl))
 
 	ticketBody := models.Ticket{
 		QrCodeUrl: qrCodeUrl,
@@ -60,12 +62,22 @@ func GetTicketHandler(c *fiber.Ctx) error {
 	return c.JSON(ticket)
 }
 
-func VerifyTicketHandler(c *fiber.Ctx) error {
+func CheckTicketHandler(c *fiber.Ctx) error {
+	ticketId := c.Params("ticket_id")
+
+	validatorId := c.QueryInt("validator_id")
+
+	ticket := repository.CheckTicket(ticketId, validatorId)
+
+	return c.JSON(ticket)
+}
+
+func ValidateTicketHandler(c *fiber.Ctx) error {
 	// Req exmp: https://t.me/botbot/event?startapp=ghfdljkh34tn87cogkhjgfd908kj   ->   extract: ghfdljkh34tn87cogkhjgfd908kj
 	ticketId := c.Params("ticket_id")
-	verifierId := c.Params("verifier_id")
+	validatorId := c.Params("validator_id")
 
-	if err := repository.VerifyTicket(ticketId, verifierId); err != nil {
+	if err := repository.ValidateTicket(ticketId, validatorId); err != nil {
 		return c.SendStatus(fiber.StatusUnprocessableEntity)
 	}
 

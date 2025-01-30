@@ -1,8 +1,10 @@
 package repository
 
 import (
+	"encoding/json"
 	"ticket-api/internal/models"
 	"ticket-api/pkg/postgres"
+	"time"
 )
 
 func GetEvent(id int) models.Event {
@@ -13,16 +15,23 @@ func GetEvent(id int) models.Event {
 }
 
 func CreateEvent(body models.CreateEventRequest) error {
+	parsedDuration, err := time.ParseDuration(body.Duration)
+	if err != nil {
+		return err
+	}
+
+	pageData, _ := json.Marshal(body.PageData)
+
 	event := models.Event{
 		Title:       body.Title,
 		Description: body.Description,
-		PageData:    body.PageData,
+		PageData:    pageData,
 		IsPaid:      body.IsPaid,
 		CoverUrl:    body.CoverUrl,
 		BasePrice:   body.BasePrice,
 		Capacity:    body.Capacity,
 		StartTime:   body.StartTime,
-		Duration:    (body.Duration),
+		Duration:    parsedDuration,
 		OrganizatorId: body.OrganizatorId,
 		// IsDoubleVerify: body.IsDoubleVerify,
 	}
@@ -42,8 +51,8 @@ func CreateEvent(body models.CreateEventRequest) error {
 	return nil
 }
 
-func GetForm(id int) []models.Field {
-	var fields []models.Field
+func GetForm(id int) []models.FieldResponse {
+	var fields []models.FieldResponse
 	postgres.DB.Raw("SELECT name, type FROM fields WHERE event_id = ?", id).Scan(&fields)
 
 	return fields
