@@ -14,6 +14,13 @@ type (
 		IsActivated bool   `json:"is_activated"`
 	}
 
+	MyTicketResponse struct {
+		Title       string `json:"title"`
+		CoverUrl    string `json:"cover_url"`
+		Variety     string `json:"variety"`
+		IsActivated bool   `json:"is_activated"`
+	}
+
 	TicketCheckResponse struct {
 		Title       string `json:"title"`
 		Variety     string `json:"variety"`

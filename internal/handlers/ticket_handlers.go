@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"strings"
+	"ticket-api/config"
 	"ticket-api/internal/models"
 	"ticket-api/pkg/repository"
 	"ticket-api/pkg/utils"
@@ -20,13 +21,14 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 
 	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.EventId, body.Variety, time.Now()))
 
-	qrCode, err := repository.CreateQrCode(body, ticketId)
+	objectName := utils.GetMD5Hash(fmt.Sprintf("%s%s", ticketId, config.Config.Password))
+
+	qrCode, err := repository.CreateQrCode(body, ticketId, objectName)
 	if err != nil {
 		return c.Status(fiber.StatusConflict).SendString(err.Error())
 	}
 
 	qrCodeUrl := strings.Trim(string(qrCode), "\"")
-
 
 	ticketBody := models.Ticket{
 		QrCodeUrl: qrCodeUrl,
@@ -40,6 +42,9 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	}
 
 	// ADD FORM DATA TO CLICKHOUSE
+	if err := repository.UploadUserData(ticketBody, body); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).SendString(err.Error())
+	}
 
 	// SEND MESSAGE FROM BOT ABOUT TAKING A TICKET
 
@@ -66,6 +71,9 @@ func CheckTicketHandler(c *fiber.Ctx) error {
 	ticketId := c.Params("ticket_id")
 
 	validatorId := c.QueryInt("validator_id")
+	if validatorId == 0 {
+		return c.Status(fiber.StatusBadRequest).SendString("validator id have not found")
+	}
 
 	ticket := repository.CheckTicket(ticketId, validatorId)
 
@@ -85,9 +93,9 @@ func ValidateTicketHandler(c *fiber.Ctx) error {
 }
 
 func GetMyTicketsHandler(c *fiber.Ctx) error {
-	id := c.QueryInt("user_id")
+	userId := c.QueryInt("user_id")
 
-	tickets := repository.GetMyTickets(id)
+	tickets := repository.GetMyTickets(userId)
 
 	return c.JSON(tickets)
 }

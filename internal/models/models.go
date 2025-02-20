@@ -35,6 +35,17 @@ type (
 		IsActivated bool   `json:"is_activated"`
 	}
 
+	TicketMeta struct {
+		UserId        int             `json:"user_id"`
+		EventId       int             `json:"event_id"`
+		TicketId      string          `json:"ticket_id"`
+		Variety       string          `json:"variety"`
+		IsActivated   bool            `json:"is_activated"`
+		TimeBought    time.Time       `json:"time_bought"`
+		TimeActivated time.Time       `json:"time_activated"`
+		UserData      json.RawMessage `json:"user_data"`
+	}
+
 	Field struct {
 		Name    string `bson:"name" json:"name" validate:"required"`
 		Type    string `bson:"type" json:"type" validate:"required"`

@@ -17,14 +17,14 @@ func SetupRoutes(app *fiber.App) {
 	// Sign up in event (take a ticket)
 	v1.Post("/ticket", TakeTicketHandler)
 
+	// Get my tickets
+	v1.Get("/ticket/my", GetMyTicketsHandler)
+
 	// Get ticket
 	v1.Get("/ticket/:id", GetTicketHandler)
 
-	// Check ticket
+	// Check ticket from QR-code link
 	v1.Get("/ticket/check/:ticket_id", CheckTicketHandler)
-
-	// Get my tickets
-	v1.Get("/ticket/my", GetMyTicketsHandler)
 
 	// Verify ticket
 	v1.Post("/ticket/verify", ValidateTicketHandler)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"ticket-api/config"
 	"ticket-api/internal/models"
+	"ticket-api/pkg/clickhouse"
 	"ticket-api/pkg/postgres"
 	"time"
 )
@@ -24,19 +25,12 @@ func TakeTicket(body models.Ticket) error {
 	return nil
 }
 
-func CreateQrCode(body models.TakeTicketRequest, ticketId string) ([]byte, error) {
-	// original := fmt.Sprintf("%d%d%s", body.UserId, body.EventId, time.Now())
-	// hash := md5.New()
-	// hash.Write([]byte(original))
-
-	// Only for url
-	// md5string := hex.EncodeToString(hash.Sum(nil))
-
+func CreateQrCode(body models.TakeTicketRequest, ticketId string, objectName string) ([]byte, error) {
 	url := fmt.Sprintf("%s?startapp=%s", config.Config.WebappName, ticketId)
 
 	data := models.QrRequestData{
 		URL:        url,
-		ObjectName: ticketId,
+		ObjectName: objectName,
 	}
 
 	// Кодирование данных в JSON
@@ -113,16 +107,20 @@ func CheckTicket(ticketId string, validatorId int) models.TicketCheckResponse {
 
 func ValidateTicket(ticketId, verifierId string) error {
 	// Changing status of Ticket
-
-	// SELECT checker_id FROM checkers WHERE event_id = ?
 	postgres.DB.Raw("UPDATE tickets SET is_activated = TRUE WHERE ticket_id = ?", ticketId)
+
+	// Updating data in clickhouse
+
+
 	// Deleting qr code from s3
+
+
 	return nil
 }
 
-func GetMyTickets(id int) []models.Ticket {
-	var tickets []models.Ticket
-	postgres.DB.Raw("SELECT * FROM tickets WHERE user_id = ?", id).Scan(&tickets)
+func GetMyTickets(id int) []models.MyTicketResponse {
+	var tickets []models.MyTicketResponse
+	postgres.DB.Raw("SELECT t.variety, t.is_activated, e.title, e.base_price, e.cover_url FROM tickets t JOIN events e ON t.event_id = e.id WHERE t.user_id = ?", id).Scan(&tickets)
 
 	return tickets
 }
@@ -132,4 +130,26 @@ func CheckValidator(eventId, validatorId int) bool {
 	postgres.DB.Raw("SELECT * FROM validators WHERE event_id = ? AND validator_id = ?", eventId, validatorId).Scan(&validator)
 
 	return validator.EventId != 0
+}
+
+func UploadUserData(body models.Ticket, ticketBody models.TakeTicketRequest) error {
+	formData, err := json.Marshal(ticketBody.FormData)
+	if err != nil {
+		return err
+	}
+
+	data := models.TicketMeta{
+		UserId:     body.UserId,
+		EventId:    body.EventId,
+		TicketId:   body.TicketId,
+		Variety:    body.Variety,
+		TimeBought: time.Now(),
+		UserData:   formData,
+	}
+
+	if err := clickhouse.DB.Create(&data).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
