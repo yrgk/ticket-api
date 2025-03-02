@@ -29,7 +29,7 @@ func GetConfig() {
 	}
 
 	// Getting values from environment file
-	PASSWORD := os.Getenv("PASSWORD")
+	Password := os.Getenv("PASSWORD")
 	DSN := os.Getenv("DSN")
 	port := os.Getenv("PORT")
 	S3ApiUrl := os.Getenv("S3_API_URL")
@@ -41,7 +41,7 @@ func GetConfig() {
 	YookassaShopID := os.Getenv("YOOKASSASHOPID")
 
 	Config = ConfigStruct{
-		Password:          PASSWORD,
+		Password:          Password,
 		DSN:               DSN,
 		Port:              port,
 		S3ApiUrl:          S3ApiUrl,

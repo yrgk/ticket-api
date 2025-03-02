@@ -47,6 +47,9 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	}
 
 	// SEND MESSAGE FROM BOT ABOUT TAKING A TICKET
+	// if err := bot.SendTicketInChat(body.UserId, ticketId); err != nil {
+	// 	return c.Status(fiber.StatusConflict).SendString("bot does not take a message")
+	// }
 
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -101,5 +104,5 @@ func GetMyTicketsHandler(c *fiber.Ctx) error {
 }
 
 func PayTicketHandler(c *fiber.Ctx) error {
-	return nil
+	return c.SendStatus(fiber.StatusOK)
 }

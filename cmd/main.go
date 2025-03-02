@@ -20,7 +20,9 @@ func main()  {
 
 	clickhouse.InitClickhouse()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		Prefork: true,
+	})
 
 	// Setting up CORS
 	app.Use(cors.New(cors.Config{
