@@ -18,9 +18,7 @@ func ConnectDb() {
 	}
 
 	db.AutoMigrate(
-		models.Event{},
 		models.Ticket{},
-		models.Field{},
 		models.Validator{},
 	)
 

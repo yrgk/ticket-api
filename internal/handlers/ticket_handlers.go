@@ -6,7 +6,7 @@ import (
 	"ticket-api/config"
 	"ticket-api/internal/bot"
 	"ticket-api/internal/models"
-	"ticket-api/pkg/repository"
+	"ticket-api/internal/repository"
 	"ticket-api/pkg/utils"
 	"time"
 

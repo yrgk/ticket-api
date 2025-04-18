@@ -8,11 +8,6 @@ func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
-	// // Create event
-	// v1.Post("/event", CreateEventHandler)
-
-	// // Get event
-	// v1.Get("/event/:id", GetEventHandler)
 
 	// Create form
 	v1.Get("/form", CreateFormHandler)

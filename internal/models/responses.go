@@ -1,11 +1,6 @@
 package models
 
 type (
-	// EventResponse struct {
-	// 	Event Event
-	// 	Form  []FieldResponse
-	// }
-
 	TicketResponse struct {
 		Title       string `json:"title"`
 		QrCodeUrl   string `json:"qr_code_url"`

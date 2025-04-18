@@ -80,27 +80,27 @@ func GetTicketForChecking(id string, userId int) models.TicketCheckResponse {
 }
 
 func CheckTicket(ticketId string, validatorId int) models.TicketCheckResponse {
-	var ticket models.Ticket
-	postgres.DB.Raw("SELECT * FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
+	// var ticket models.Ticket
+	// postgres.DB.Raw("SELECT * FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
 
-	event := GetEvent(ticket.FormId)
+	// event := GetEvent(ticket.FormId)
 
-	var validatorIDs []int
-	postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.FormId).Scan(&validatorIDs)
+	// var validatorIDs []int
+	// postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.FormId).Scan(&validatorIDs)
 
-	if validatorId == event.OrganizatorId {
+	// if validatorId == event.OrganizatorId {
 
-		ticketData := GetTicketForChecking(ticketId, validatorId)
-		return ticketData
-	}
+	// 	ticketData := GetTicketForChecking(ticketId, validatorId)
+	// 	return ticketData
+	// }
 
-	for _, id := range validatorIDs {
-		if validatorId == id {
+	// for _, id := range validatorIDs {
+	// 	if validatorId == id {
 
-			ticketData := GetTicketForChecking(ticketId, validatorId)
-			return ticketData
-		}
-	}
+	// 		ticketData := GetTicketForChecking(ticketId, validatorId)
+	// 		return ticketData
+	// 	}
+	// }
 
 	return models.TicketCheckResponse{}
 }
