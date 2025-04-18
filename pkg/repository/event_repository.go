@@ -23,17 +23,16 @@ func CreateEvent(body models.CreateEventRequest) error {
 	pageData, _ := json.Marshal(body.PageData)
 
 	event := models.Event{
-		Title:       body.Title,
-		Description: body.Description,
-		PageData:    pageData,
-		IsPaid:      body.IsPaid,
-		CoverUrl:    body.CoverUrl,
-		BasePrice:   body.BasePrice,
-		Capacity:    body.Capacity,
-		StartTime:   body.StartTime,
-		Duration:    parsedDuration,
+		Title:         body.Title,
+		Description:   body.Description,
+		PageData:      pageData,
+		IsPaid:        body.IsPaid,
+		CoverUrl:      body.CoverUrl,
+		BasePrice:     body.BasePrice,
+		Capacity:      body.Capacity,
+		StartTime:     body.StartTime,
+		Duration:      parsedDuration,
 		OrganizatorId: body.OrganizatorId,
-		// IsDoubleVerify: body.IsDoubleVerify,
 	}
 
 	if err := postgres.DB.Create(&event).Error; err != nil {
@@ -41,7 +40,7 @@ func CreateEvent(body models.CreateEventRequest) error {
 	}
 
 	for i := range body.FormData {
-		body.FormData[i].EventId = event.ID
+		body.FormData[i].FormId = event.ID
 	}
 
 	if err := postgres.DB.Create(&body.FormData).Error; err != nil {
@@ -49,11 +48,4 @@ func CreateEvent(body models.CreateEventRequest) error {
 	}
 
 	return nil
-}
-
-func GetForm(id int) []models.FieldResponse {
-	var fields []models.FieldResponse
-	postgres.DB.Raw("SELECT name, type FROM fields WHERE event_id = ?", id).Scan(&fields)
-
-	return fields
 }

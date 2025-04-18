@@ -19,15 +19,9 @@ func GetEventHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 
-	form := repository.GetForm(id)
-
-	response := models.EventResponse{
-		Event: event,
-		Form:  form,
-	}
-
-	return c.JSON(response)
+	return c.JSON(event)
 }
+
 
 func CreateEventHandler(c *fiber.Ctx) error {
 	var body models.CreateEventRequest

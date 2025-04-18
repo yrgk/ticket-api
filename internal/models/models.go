@@ -29,7 +29,7 @@ type (
 		gorm.Model
 		QrCodeUrl   string `json:"qr_code_url"`
 		UserId      int    `json:"user_id"`
-		EventId     int    `json:"event_id"`
+		FormId      int    `json:"form_id"`
 		TicketId    string `json:"ticket_id"`
 		Variety     string `json:"variety"`
 		IsActivated bool   `json:"is_activated"`
@@ -37,19 +37,13 @@ type (
 
 	TicketMeta struct {
 		UserId        int             `json:"user_id"`
-		EventId       int             `json:"event_id"`
+		FormId        int             `json:"form_id"`
 		TicketId      string          `json:"ticket_id"`
 		Variety       string          `json:"variety"`
 		IsActivated   bool            `json:"is_activated"`
 		TimeBought    time.Time       `json:"time_bought"`
 		TimeActivated time.Time       `json:"time_activated"`
 		UserData      json.RawMessage `json:"user_data"`
-	}
-
-	Field struct {
-		Name    string `bson:"name" json:"name" validate:"required"`
-		Type    string `bson:"type" json:"type" validate:"required"`
-		EventId uint   `bson:"type" json:"event_id" validate:"required"`
 	}
 
 	Validator struct {

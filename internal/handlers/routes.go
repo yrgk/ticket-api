@@ -8,13 +8,19 @@ func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
-	// Create event
-	v1.Post("/event", CreateEventHandler)
+	// // Create event
+	// v1.Post("/event", CreateEventHandler)
 
-	// Get event
-	v1.Get("/event/:id", GetEventHandler)
+	// // Get event
+	// v1.Get("/event/:id", GetEventHandler)
 
-	// Sign up in event (take a ticket)
+	// Create form
+	v1.Get("/form", CreateFormHandler)
+
+	// Get form
+	v1.Get("/form/:id", GetFormHandler)
+
+	// Take a ticket
 	v1.Post("/ticket", TakeTicketHandler)
 
 	// Get my tickets
@@ -29,5 +35,6 @@ func SetupRoutes(app *fiber.App) {
 	// Verify ticket
 	v1.Post("/ticket/verify", ValidateTicketHandler)
 
+	// Pay ticket
 	v1.Post("/ticket/pay", PayTicketHandler)
 }

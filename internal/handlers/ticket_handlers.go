@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"ticket-api/config"
+	"ticket-api/internal/bot"
 	"ticket-api/internal/models"
 	"ticket-api/pkg/repository"
 	"ticket-api/pkg/utils"
@@ -16,10 +17,10 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	var body models.TakeTicketRequest
 
 	if err := c.BodyParser(&body); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.Status(fiber.ErrBadRequest.Code).SendString(err.Error())
 	}
 
-	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.EventId, body.Variety, time.Now()))
+	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.FormId, body.Variety, time.Now()))
 
 	objectName := utils.GetMD5Hash(fmt.Sprintf("%s%s", ticketId, config.Config.Password))
 
@@ -33,7 +34,7 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	ticketBody := models.Ticket{
 		QrCodeUrl: qrCodeUrl,
 		UserId:    body.UserId,
-		EventId:   body.EventId,
+		FormId:    body.FormId,
 		TicketId:  ticketId,
 	}
 
@@ -47,9 +48,9 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	}
 
 	// SEND MESSAGE FROM BOT ABOUT TAKING A TICKET
-	// if err := bot.SendTicketInChat(body.UserId, ticketId); err != nil {
-	// 	return c.Status(fiber.StatusConflict).SendString("bot does not take a message")
-	// }
+	if err := bot.SendTicketInChat(body.UserId, ticketId); err != nil {
+		return c.Status(fiber.StatusConflict).SendString("bot does not sent a message")
+	}
 
 	return c.SendStatus(fiber.StatusOK)
 }
@@ -84,7 +85,6 @@ func CheckTicketHandler(c *fiber.Ctx) error {
 }
 
 func ValidateTicketHandler(c *fiber.Ctx) error {
-	// Req exmp: https://t.me/botbot/event?startapp=ghfdljkh34tn87cogkhjgfd908kj   ->   extract: ghfdljkh34tn87cogkhjgfd908kj
 	ticketId := c.Params("ticket_id")
 	validatorId := c.Params("validator_id")
 

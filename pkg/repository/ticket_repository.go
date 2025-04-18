@@ -18,7 +18,7 @@ func TakeTicket(body models.Ticket) error {
 		return err
 	}
 
-	if err := postgres.DB.Exec("UPDATE events SET participants_count = participants_count + 1 WHERE id = ?", body.EventId).Error; err != nil {
+	if err := postgres.DB.Exec("UPDATE events SET participants_count = participants_count + 1 WHERE id = ?", body.FormId).Error; err != nil {
 		return err
 	}
 
@@ -83,10 +83,10 @@ func CheckTicket(ticketId string, validatorId int) models.TicketCheckResponse {
 	var ticket models.Ticket
 	postgres.DB.Raw("SELECT * FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
 
-	event := GetEvent(ticket.EventId)
+	event := GetEvent(ticket.FormId)
 
 	var validatorIDs []int
-	postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.EventId).Scan(&validatorIDs)
+	postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.FormId).Scan(&validatorIDs)
 
 	if validatorId == event.OrganizatorId {
 
@@ -111,9 +111,7 @@ func ValidateTicket(ticketId, verifierId string) error {
 
 	// Updating data in clickhouse
 
-
 	// Deleting qr code from s3
-
 
 	return nil
 }
@@ -140,7 +138,7 @@ func UploadUserData(body models.Ticket, ticketBody models.TakeTicketRequest) err
 
 	data := models.TicketMeta{
 		UserId:     body.UserId,
-		EventId:    body.EventId,
+		FormId:     body.FormId,
 		TicketId:   body.TicketId,
 		Variety:    body.Variety,
 		TimeBought: time.Now(),

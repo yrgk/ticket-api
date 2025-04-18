@@ -20,7 +20,7 @@ type (
 
 	TakeTicketRequest struct {
 		UserId   int         `json:"user_id"`
-		EventId  int         `json:"event_id"`
+		FormId   int         `json:"form_id"`
 		Variety  string      `json:"variety"`
 		FormData interface{} `json:"form_data"`
 	}

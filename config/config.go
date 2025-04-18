@@ -9,11 +9,14 @@ import (
 
 type ConfigStruct struct {
 	Password          string
+	BotToken          string
+	BotName           string
 	DSN               string
 	Port              string
 	S3ApiUrl          string
 	BucketName        string
 	WebappName        string
+	ClientUrl         string
 	MongoUrl          string
 	YookassaAPIURL    string
 	YooKassaSecretKey string
@@ -30,11 +33,14 @@ func GetConfig() {
 
 	// Getting values from environment file
 	Password := os.Getenv("PASSWORD")
+	BotToken := os.Getenv("BOT_TOKEN")
+	BotName := os.Getenv("BOT_NAME")
 	DSN := os.Getenv("DSN")
 	port := os.Getenv("PORT")
 	S3ApiUrl := os.Getenv("S3_API_URL")
 	BucketName := os.Getenv("BUCKET_NAME")
 	WebappName := os.Getenv("WEBAPP_NAME")
+	ClientUrl := os.Getenv("CLIENT_URL")
 	MongoUrl := os.Getenv("MONGO_URL")
 	YookassaAPIURL := os.Getenv("YOOKASSAAPIURL")
 	YooKassaSecretKey := os.Getenv("YOOKASSASECRETKEY")
@@ -42,11 +48,14 @@ func GetConfig() {
 
 	Config = ConfigStruct{
 		Password:          Password,
+		BotToken:          BotToken,
+		BotName:           BotName,
 		DSN:               DSN,
 		Port:              port,
 		S3ApiUrl:          S3ApiUrl,
 		BucketName:        BucketName,
 		WebappName:        WebappName,
+		ClientUrl:         ClientUrl,
 		MongoUrl:          MongoUrl,
 		YookassaAPIURL:    YookassaAPIURL,
 		YooKassaShopID:    YookassaShopID,

@@ -1,10 +1,10 @@
 package models
 
 type (
-	EventResponse struct {
-		Event Event
-		Form  []FieldResponse
-	}
+	// EventResponse struct {
+	// 	Event Event
+	// 	Form  []FieldResponse
+	// }
 
 	TicketResponse struct {
 		Title       string `json:"title"`
@@ -26,10 +26,5 @@ type (
 		Variety     string `json:"variety"`
 		IsActivated bool   `json:"is_activated"`
 		UserId      int    `json:"user_id"`
-	}
-
-	FieldResponse struct {
-		Name string `json:"name" validate:"required"`
-		Type string `json:"type" validate:"required"`
 	}
 )
