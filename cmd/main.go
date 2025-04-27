@@ -41,5 +41,6 @@ func main()  {
 
 	handlers.SetupRoutes(app)
 
-	app.Listen(":8080")
+	// app.Listen(":8080")
+	app.ListenTLS(":8080", "/etc/letsencrypt/live/catalogio.space/fullchain.pem", "/etc/letsencrypt/live/catalogio.space/privkey.pem")
 }
