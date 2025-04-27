@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"ticket-api/config"
-	"ticket-api/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,11 +15,6 @@ func ConnectDb() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-
-	db.AutoMigrate(
-		models.Ticket{},
-		models.Validator{},
-	)
 
 	DB = db
 }

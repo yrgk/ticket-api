@@ -7,8 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type JSONB map[string]interface{}
-
 type (
 	Ticket struct {
 		gorm.Model
@@ -20,7 +18,9 @@ type (
 		IsActivated bool   `json:"is_activated"`
 	}
 
+	// Clickhouse model (not at the moment)
 	TicketMeta struct {
+		gorm.Model
 		UserId        int             `json:"user_id"`
 		FormId        int             `json:"form_id"`
 		TicketId      string          `json:"ticket_id"`

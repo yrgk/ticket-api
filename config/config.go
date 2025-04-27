@@ -14,6 +14,8 @@ type ConfigStruct struct {
 	DSN               string
 	Port              string
 	S3ApiUrl          string
+	AccessToken       string
+	SecretKey         string
 	BucketName        string
 	WebappName        string
 	ClientUrl         string
@@ -41,6 +43,8 @@ func GetConfig() {
 	BucketName := os.Getenv("BUCKET_NAME")
 	WebappName := os.Getenv("WEBAPP_NAME")
 	ClientUrl := os.Getenv("CLIENT_URL")
+	AccessToken := os.Getenv("ACCESS_TOKEN")
+	SecretKey := os.Getenv("SECRET_ACCESS_KEY")
 	MongoUrl := os.Getenv("MONGO_URL")
 	YookassaAPIURL := os.Getenv("YOOKASSAAPIURL")
 	YooKassaSecretKey := os.Getenv("YOOKASSASECRETKEY")
@@ -53,6 +57,8 @@ func GetConfig() {
 		DSN:               DSN,
 		Port:              port,
 		S3ApiUrl:          S3ApiUrl,
+		AccessToken:       AccessToken,
+		SecretKey:         SecretKey,
 		BucketName:        BucketName,
 		WebappName:        WebappName,
 		ClientUrl:         ClientUrl,

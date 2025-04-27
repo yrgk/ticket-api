@@ -3,7 +3,8 @@ package main
 import (
 	"ticket-api/config"
 	"ticket-api/internal/handlers"
-	"ticket-api/pkg/clickhouse"
+	"ticket-api/internal/models"
+	// "ticket-api/pkg/clickhouse"
 	"ticket-api/pkg/postgres"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,9 +17,14 @@ func main()  {
 
 	postgres.ConnectDb()
 
-	// mongo.InitMongo()
+	postgres.DB.AutoMigrate(
+		models.Form{},
+		models.Field{},
+		models.Ticket{},
+		models.Validator{},
+	)
 
-	clickhouse.InitClickhouse()
+	// clickhouse.InitClickhouse()
 
 	app := fiber.New(fiber.Config{
 		Prefork: true,

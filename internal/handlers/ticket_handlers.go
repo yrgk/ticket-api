@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"strings"
-	"ticket-api/config"
 	"ticket-api/internal/bot"
 	"ticket-api/internal/models"
 	"ticket-api/internal/repository"
-	"ticket-api/pkg/utils"
+	"ticket-api/internal/utils"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,26 +18,27 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.ErrBadRequest.Code).SendString(err.Error())
 	}
 
+	// Making a public id for ticket
 	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.FormId, body.Variety, time.Now()))
 
-	objectName := utils.GetMD5Hash(fmt.Sprintf("%s%s", ticketId, config.Config.Password))
+	// Making an object name (key) for S3
+	// objectName := utils.GetMD5Hash(fmt.Sprintf("%s%s", ticketId, config.Config.Password))
 
-	qrCode, err := repository.CreateQrCode(body, ticketId, objectName)
+	// Making a QR-code url in S3 (content of qr code: https://t.me/botname/app?startapp=check=ticketId)
+	qrCode, err := utils.CreateQrCode(body, ticketId)
 	if err != nil {
 		return c.Status(fiber.StatusConflict).SendString(err.Error())
 	}
 
-	qrCodeUrl := strings.Trim(string(qrCode), "\"")
-
 	ticketBody := models.Ticket{
-		QrCodeUrl: qrCodeUrl,
+		QrCodeUrl: qrCode,
 		UserId:    body.UserId,
 		FormId:    body.FormId,
 		TicketId:  ticketId,
 	}
 
 	if err := repository.TakeTicket(ticketBody); err != nil {
-		return c.Status(fiber.StatusConflict).SendString("event is full")
+		return c.Status(fiber.StatusConflict).SendString("form is full")
 	}
 
 	// ADD FORM DATA TO CLICKHOUSE

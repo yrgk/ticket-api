@@ -1,14 +1,9 @@
 package repository
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"ticket-api/config"
 	"ticket-api/internal/models"
-	"ticket-api/pkg/clickhouse"
+	"ticket-api/internal/utils"
 	"ticket-api/pkg/postgres"
 	"time"
 )
@@ -18,56 +13,16 @@ func TakeTicket(body models.Ticket) error {
 		return err
 	}
 
-	if err := postgres.DB.Exec("UPDATE events SET participants_count = participants_count + 1 WHERE id = ?", body.FormId).Error; err != nil {
+	if err := postgres.DB.Exec("UPDATE forms SET participants_count = participants_count + 1 WHERE id = ?", body.FormId).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func CreateQrCode(body models.TakeTicketRequest, ticketId string, objectName string) ([]byte, error) {
-	url := fmt.Sprintf("%s?startapp=%s", config.Config.WebappName, ticketId)
-
-	data := models.QrRequestData{
-		URL:        url,
-		ObjectName: objectName,
-	}
-
-	// Кодирование данных в JSON
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal JSON: %w", err)
-	}
-
-	// Создание HTTP-клиента с таймаутом
-	client := &http.Client{Timeout: 10 * time.Second}
-
-	// Создание запроса
-	// req, err := http.NewRequest("POST", "http://185.197.75.220:8000/create", bytes.NewBuffer(jsonData))
-	req, err := http.NewRequest("POST", "http://127.0.0.1:8000/create", bytes.NewBuffer(jsonData))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	// Отправка запроса
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Чтение ответа
-	response, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	return response, nil
-}
-
 func GetTicket(id int, userId int) models.TicketResponse {
 	var ticket models.TicketResponse
-	postgres.DB.Raw("SELECT e.title, t.qr_code_url, t.event_id, t.variety, t.is_activated FROM events e, tickets t WHERE e.id = ? AND t.user_id = ?", id, userId).Scan(&ticket)
+	postgres.DB.Raw("SELECT f.title, t.qr_code_url, t.form_id, t.variety, t.is_activated FROM forms f, tickets t WHERE t.ticket_id = ? AND t.user_id = ?", id, userId).Scan(&ticket)
 
 	return ticket
 }
@@ -80,11 +35,18 @@ func GetTicketForChecking(id string, userId int) models.TicketCheckResponse {
 }
 
 func CheckTicket(ticketId string, validatorId int) models.TicketCheckResponse {
-	// var ticket models.Ticket
-	// postgres.DB.Raw("SELECT * FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
+	var ticket models.Ticket
+	postgres.DB.Raw("SELECT * FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
 
-	// event := GetEvent(ticket.FormId)
+	var title string
+	postgres.DB.Raw("SELECR title FROM forms WHERE form_id = ?", ticket.FormId).Scan(&title)
 
+	response := models.TicketCheckResponse{
+		Title:       title,
+		IsActivated: ticket.IsActivated,
+	}
+
+	return response
 	// var validatorIDs []int
 	// postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.FormId).Scan(&validatorIDs)
 
@@ -102,7 +64,7 @@ func CheckTicket(ticketId string, validatorId int) models.TicketCheckResponse {
 	// 	}
 	// }
 
-	return models.TicketCheckResponse{}
+	// return models.TicketCheckResponse{}
 }
 
 func ValidateTicket(ticketId, verifierId string) error {
@@ -112,6 +74,9 @@ func ValidateTicket(ticketId, verifierId string) error {
 	// Updating data in clickhouse
 
 	// Deleting qr code from s3
+	if err := utils.DeleteFromS3(ticketId); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -145,7 +110,7 @@ func UploadUserData(body models.Ticket, ticketBody models.TakeTicketRequest) err
 		UserData:   formData,
 	}
 
-	if err := clickhouse.DB.Create(&data).Error; err != nil {
+	if err := postgres.DB.Create(&data).Error; err != nil {
 		return err
 	}
 

@@ -3,12 +3,26 @@ package models
 import "gorm.io/gorm"
 
 type (
+	FormRequest struct {
+		gorm.Model
+		Title             string  `json:"title"`
+		Fields            []Field `json:"fields"`
+		ParticipantsLimit int     `json:"participants_limit"`
+		UserId            int     `json:"user_id"`
+	}
+
 	Form struct {
 		gorm.Model
-		Title  string  `json:"title"`
-		Fields []Field `json:"fields"`
-		FormId string  `json:"form_id"`
-		UserId int     `json:"user_id"`
+		Title             string `json:"title"`
+		PublicId          string `json:"public_id"` // Visible id in type of hashed string
+		ParticipantsCount int    `json:"participants_count"`
+		ParticipantsLimit int    `json:"participants_limit"`
+		UserId            int    `json:"user_id"`
+	}
+
+	FormResponse struct {
+		Title  string          `json:"title"`
+		Fields []FieldResponse `json:"fields"`
 	}
 
 	Field struct {
@@ -20,10 +34,5 @@ type (
 	FieldResponse struct {
 		Name string `json:"name" validate:"required"`
 		Type string `json:"type" validate:"required"`
-	}
-
-	FormResponse struct {
-		Title  string          `json:"title"`
-		Fields []FieldResponse `json:"fields"`
 	}
 )
