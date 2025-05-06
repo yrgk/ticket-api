@@ -28,7 +28,7 @@ type (
 		IsActivated   bool            `json:"is_activated"`
 		TimeBought    time.Time       `json:"time_bought"`
 		TimeActivated time.Time       `json:"time_activated"`
-		UserData      json.RawMessage `json:"user_data"`
+		UserData      json.RawMessage `json:"user_data" gorm:"type:jsonb"`
 	}
 
 	Validator struct {
