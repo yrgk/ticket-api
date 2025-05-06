@@ -15,11 +15,11 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	var body models.TakeTicketRequest
 
 	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.ErrBadRequest.Code).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	// Making a public id for ticket
-	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.FormId, body.Variety, time.Now()))
+	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%s%s%v", body.UserId, body.FormId, body.Variety, time.Now()))
 
 	// Making an object name (key) for S3
 	// objectName := utils.GetMD5Hash(fmt.Sprintf("%s%s", ticketId, config.Config.Password))
