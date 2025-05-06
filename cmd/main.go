@@ -51,5 +51,5 @@ func main()  {
 	log.Println("Routes setted up")
 	handlers.SetupRoutes(app)
 
-	app.Listen(":8080")
+	app.Listen(":3001")
 }
