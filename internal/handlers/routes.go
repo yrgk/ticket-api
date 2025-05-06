@@ -32,12 +32,11 @@ func SetupRoutes(app *fiber.App) {
 	v1.Get("/ticket/check/:ticket_id", CheckTicketHandler)
 
 	// Verify ticket
-	v1.Post("/ticket/verify", ValidateTicketHandler)
+	v1.Post("/ticket/validate/:ticketId", ValidateTicketHandler)
 
 	// Pay ticket
 	v1.Post("/ticket/pay", PayTicketHandler)
 
-
-
+	// Export registrations data to excel file
 	v1.Post("/export/:id", ExportDataToExcel)
 }

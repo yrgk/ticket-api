@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"ticket-api/internal/models"
 	"ticket-api/internal/utils"
 	"ticket-api/pkg/postgres"
@@ -54,35 +55,29 @@ func CheckTicket(ticketId string, validatorId int) (models.TicketCheckResponse, 
 	}
 
 	return response, nil
-	// var validatorIDs []int
-	// postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.FormId).Scan(&validatorIDs)
-
-	// if validatorId == event.OrganizatorId {
-
-	// 	ticketData := GetTicketForChecking(ticketId, validatorId)
-	// 	return ticketData
-	// }
-
-	// for _, id := range validatorIDs {
-	// 	if validatorId == id {
-
-	// 		ticketData := GetTicketForChecking(ticketId, validatorId)
-	// 		return ticketData
-	// 	}
-	// }
-
-	// return models.TicketCheckResponse{}
 }
 
-func ValidateTicket(ticketId, verifierId string) error {
-	// Changing status of Ticket
-	postgres.DB.Raw("UPDATE tickets SET is_activated = TRUE WHERE ticket_id = ?", ticketId)
+// ticketId is Public
+func ValidateTicket(ticketId string, userId int) error {
+	var ticket models.Ticket
+	postgres.DB.Raw("SELECT form_id FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
+
+	var form models.Form
+	postgres.DB.Raw("SELECT user_id FROM forms WHERE id = ?", ticket.FormId).Scan(&form)
+
+	// Checking if validator id is valid
+	if userId != form.UserId {
+		return errors.New("incorrect validator id")
+	}
+
+	// Changing status of Ticket and deleting QR-code link
+	postgres.DB.Exec("UPDATE tickets SET qr_code_url = NULL, is_activated = TRUE WHERE ticket_id = ?", ticketId)
 
 	// Updating data in clickhouse
 
 	// Deleting qr code from s3
 	if err := utils.DeleteFromS3(ticketId); err != nil {
-		return err
+		log.Println("ERROR DELETING QR CODE FROM S3", ticketId, err)
 	}
 
 	return nil
@@ -90,7 +85,7 @@ func ValidateTicket(ticketId, verifierId string) error {
 
 func GetMyTickets(id int) []models.MyTicketResponse {
 	var tickets []models.MyTicketResponse
-	postgres.DB.Raw("SELECT t.variety, t.is_activated, e.title, e.base_price, e.cover_url FROM tickets t JOIN events e ON t.event_id = e.id WHERE t.user_id = ?", id).Scan(&tickets)
+	postgres.DB.Raw("SELECT t.variety, t.is_activated, f.title FROM tickets t JOIN forms f ON t.form_id = f.id WHERE t.user_id = ?", id).Scan(&tickets)
 
 	return tickets
 }

@@ -59,7 +59,7 @@ func GetForm(publicId string) models.FormResponse {
 
 func GetMyProjects(userId string) models.MyProjectsResponse {
 	var projects models.MyProjectsResponse
-	postgres.DB.Raw("SELECT public_id, title FROM forms WHERE user_id = ?", userId).Scan(&projects.Forms)
+	postgres.DB.Raw("SELECT public_id, title, participants_count, participants_limit FROM forms WHERE user_id = ?", userId).Scan(&projects.Forms)
 
 	return projects
 }

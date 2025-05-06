@@ -18,8 +18,10 @@ type (
 
 	MyProjectsResponse struct {
 		Forms []struct {
-			PublicId string
-			Title    string
+			PublicId          string `json:"public_id"`
+			Title             string `json:"title"`
+			ParticipantsCount int    `json:"participants_count"`
+			ParticipantsLimit int    `json:"participants_limit"`
 		}
 	}
 

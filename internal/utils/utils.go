@@ -26,24 +26,25 @@ func GetMD5Hash(text string) string {
 }
 
 func DeleteFromS3(key string) error {
+	client, err := GetS3Client()
+	if err != nil {
+		return err
+	}
+
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(Config.Config.BucketName),
+		Key:    aws.String(key), // file name
+	}
+
+	_, err = client.DeleteObject(context.TODO(), input)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// func CreateQrCode(body models.TakeTicketRequest, ticketId string, objectName string) (string, error) {
-func CreateQrCode(body models.TakeTicketRequest, ticketId string) (string, error) {
-	url := fmt.Sprintf("%s?startapp=check_%s", Config.Config.WebappName, ticketId)
-	qr, err := qrcode.New(url, qrcode.Medium)
-	if err != nil {
-		return "", fmt.Errorf("qr generation failed: %w", err)
-	}
-
-	// Encoding QR-code
-	var buf bytes.Buffer
-	err = png.Encode(&buf, qr.Image(256))
-	if err != nil {
-		return "", fmt.Errorf("png encoding failed: %w", err)
-	}
-
+func GetS3Client() (*s3.Client, error) {
 	// Making config
 	resolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 		if service == s3.ServiceID && region == "ru-central1" {
@@ -64,11 +65,34 @@ func CreateQrCode(body models.TakeTicketRequest, ticketId string) (string, error
 		config.WithEndpointResolverWithOptions(resolver),
 	)
 	if err != nil {
-		return "", fmt.Errorf("aws config load failed: %w", err)
+		return &s3.Client{}, fmt.Errorf("aws config load failed: %w", err)
 	}
 
 	// Initialize S3 client
 	client := s3.NewFromConfig(cfg)
+
+	return client, nil
+}
+
+// func CreateQrCode(body models.TakeTicketRequest, ticketId string, objectName string) (string, error) {
+func CreateQrCode(body models.TakeTicketRequest, ticketId string) (string, error) {
+	url := fmt.Sprintf("%s?startapp=check_%s", Config.Config.WebappName, ticketId)
+	qr, err := qrcode.New(url, qrcode.Medium)
+	if err != nil {
+		return "", fmt.Errorf("qr generation failed: %w", err)
+	}
+
+	// Encoding QR-code
+	var buf bytes.Buffer
+	err = png.Encode(&buf, qr.Image(256))
+	if err != nil {
+		return "", fmt.Errorf("png encoding failed: %w", err)
+	}
+
+	client, err := GetS3Client()
+	if err != nil {
+		return "", err
+	}
 
 	// Upload file
 	_, err = client.PutObject(context.Background(), &s3.PutObjectInput{

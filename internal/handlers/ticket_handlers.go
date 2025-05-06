@@ -84,11 +84,11 @@ func CheckTicketHandler(c *fiber.Ctx) error {
 }
 
 func ValidateTicketHandler(c *fiber.Ctx) error {
-	ticketId := c.Params("ticket_id")
-	validatorId := c.Params("validator_id")
+	ticketId := c.Params("ticketId")
+	validatorId := c.QueryInt("validator_id")
 
 	if err := repository.ValidateTicket(ticketId, validatorId); err != nil {
-		return c.SendStatus(fiber.StatusUnprocessableEntity)
+		return c.Status(fiber.StatusForbidden).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)

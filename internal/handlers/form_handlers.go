@@ -36,7 +36,7 @@ func GetMyProjectsHandler(c *fiber.Ctx) error {
 	userId := c.Query("user_id")
 
 	projects := repository.GetMyProjects(userId)
-	if projects.Forms[0].Title == "" {
+	if len(projects.Forms) == 0 {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 
