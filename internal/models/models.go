@@ -12,7 +12,7 @@ type (
 		gorm.Model
 		QrCodeUrl   string `json:"qr_code_url"`
 		UserId      int    `json:"user_id"`
-		FormId      string `json:"form_id"`
+		FormId      int    `json:"form_id"`
 		TicketId    string `json:"ticket_id"`
 		Variety     string `json:"variety"`
 		IsActivated bool   `json:"is_activated"`
@@ -22,7 +22,7 @@ type (
 	TicketMeta struct {
 		gorm.Model
 		UserId        int             `json:"user_id"`
-		FormId        string          `json:"form_id"`
+		FormId        int             `json:"form_id"`
 		TicketId      string          `json:"ticket_id"`
 		Variety       string          `json:"variety"`
 		IsActivated   bool            `json:"is_activated"`
