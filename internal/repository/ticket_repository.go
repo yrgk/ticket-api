@@ -37,7 +37,7 @@ func GetTicketForChecking(id string, userId int) models.TicketCheckResponse {
 
 func CheckTicket(ticketId string, validatorId int) (models.TicketCheckResponse, error) {
 	var ticket models.Ticket
-	postgres.DB.Raw("SELECT form_id, is_activated FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
+	postgres.DB.Raw("SELECT form_id, is_activated, variety FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
 
 	var form models.Form
 	postgres.DB.Raw("SELECT title, user_id FROM forms WHERE id = ?", ticket.FormId).Scan(&form)
@@ -50,6 +50,7 @@ func CheckTicket(ticketId string, validatorId int) (models.TicketCheckResponse, 
 	response := models.TicketCheckResponse{
 		Title:       form.Title,
 		IsActivated: ticket.IsActivated,
+		Variety:     ticket.Variety,
 	}
 
 	return response, nil

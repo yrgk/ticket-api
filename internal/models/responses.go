@@ -26,7 +26,7 @@ type (
 	TicketCheckResponse struct {
 		Title       string `json:"title"`
 		IsActivated bool   `json:"is_activated"`
-		// Variety string `json:"variety"`
+		Variety     string `json:"variety"`
 		// UserId      int  `json:"user_id"`
 	}
 )
