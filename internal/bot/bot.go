@@ -10,7 +10,7 @@ func SendTicketInChat(userId int, ticketId string) error {
 	// text := fmt.Sprintf("Билет успешно получен! | ")
 	text := "Билет успешно получен!"
 
-	url := fmt.Sprintf("%s?startapp=ticket_%s", config.Config.ClientUrl, ticketId)
+	url := fmt.Sprintf("%s/ticket/%s?user_id=%d", config.Config.ClientUrl, ticketId, userId)
 
 	req := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s&reply_markup={\"inline_keyboard\":[[{\"text\":\"Открыть билет\",\"web_app\":{\"url\":\"%s\"}}]]}", config.Config.BotToken, userId, text, url)
 
