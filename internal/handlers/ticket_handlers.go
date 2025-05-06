@@ -56,11 +56,8 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 
 // WITH USER ID AUTH
 func GetTicketHandler(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+	id := c.Params("id")
 	userId := c.QueryInt("user_id")
-	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
 
 	ticket := repository.GetTicket(id, userId)
 	if ticket.Title == "" {

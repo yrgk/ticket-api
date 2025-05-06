@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"ticket-api/config"
 	"ticket-api/internal/handlers"
 	"ticket-api/internal/models"
@@ -13,24 +15,30 @@ import (
 )
 
 func main()  {
+	log.Println("Config gotten")
 	config.GetConfig()
 
+	log.Println("DB connected")
 	postgres.ConnectDb()
 
+	log.Println("Tables migrated")
 	postgres.DB.AutoMigrate(
 		models.Form{},
 		models.Field{},
 		models.Ticket{},
+		models.TicketMeta{},
 		models.Validator{},
 	)
 
 	// clickhouse.InitClickhouse()
 
+	log.Println("App inited")
 	app := fiber.New(fiber.Config{
 		Prefork: true,
 	})
 
 	// Setting up CORS
+	log.Println("CORS setted up")
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
@@ -39,8 +47,9 @@ func main()  {
 	// Setting up logger
 	app.Use(logger.New())
 
+	// Setting up routes
+	log.Println("Routes setted up")
 	handlers.SetupRoutes(app)
 
-	// app.Listen(":8080")
-	app.ListenTLS(":8080", "/etc/letsencrypt/live/catalogio.space/fullchain.pem", "/etc/letsencrypt/live/catalogio.space/privkey.pem")
+	app.Listen(":8080")
 }

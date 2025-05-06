@@ -20,7 +20,7 @@ func TakeTicket(body models.Ticket) error {
 	return nil
 }
 
-func GetTicket(id int, userId int) models.TicketResponse {
+func GetTicket(id string, userId int) models.TicketResponse {
 	var ticket models.TicketResponse
 	postgres.DB.Raw("SELECT f.title, t.qr_code_url, t.form_id, t.variety, t.is_activated FROM forms f, tickets t WHERE t.ticket_id = ? AND t.user_id = ?", id, userId).Scan(&ticket)
 
