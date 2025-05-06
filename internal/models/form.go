@@ -21,6 +21,7 @@ type (
 	}
 
 	FormResponse struct {
+		ID     uint            `json:"id"`
 		Title  string          `json:"title"`
 		Fields []FieldResponse `json:"fields"`
 	}

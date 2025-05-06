@@ -49,6 +49,7 @@ func GetForm(publicId string) models.FormResponse {
 	postgres.DB.Raw("SELECT name, type FROM fields WHERE form_id = ?", data.Id).Scan(&fields)
 
 	response := models.FormResponse{
+		ID: data.Id,
 		Title:  data.Title,
 		Fields: fields,
 	}

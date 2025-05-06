@@ -21,6 +21,7 @@ func CreateFormHandler(c *fiber.Ctx) error {
 }
 
 func GetFormHandler(c *fiber.Ctx) error {
+	// Public form id
 	id := c.Params("id")
 
 	form := repository.GetForm(id)
