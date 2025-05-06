@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"errors"
 	"ticket-api/internal/models"
 	"ticket-api/internal/utils"
 	"ticket-api/pkg/postgres"
@@ -34,19 +35,24 @@ func GetTicketForChecking(id string, userId int) models.TicketCheckResponse {
 	return ticket
 }
 
-func CheckTicket(ticketId string, validatorId int) models.TicketCheckResponse {
+func CheckTicket(ticketId string, validatorId int) (models.TicketCheckResponse, error) {
 	var ticket models.Ticket
-	postgres.DB.Raw("SELECT * FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
+	postgres.DB.Raw("SELECT form_id, is_activated FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
 
-	var title string
-	postgres.DB.Raw("SELECR title FROM forms WHERE form_id = ?", ticket.FormId).Scan(&title)
+	var form models.Form
+	postgres.DB.Raw("SELECT title, user_id FROM forms WHERE id = ?", ticket.FormId).Scan(&form)
+
+	// Checking if validator is real
+	if form.UserId != validatorId {
+		return models.TicketCheckResponse{}, errors.New("forbidden")
+	}
 
 	response := models.TicketCheckResponse{
-		Title:       title,
+		Title:       form.Title,
 		IsActivated: ticket.IsActivated,
 	}
 
-	return response
+	return response, nil
 	// var validatorIDs []int
 	// postgres.DB.Raw("SELECT validator_id FROM validators WHERE event_id = ?", ticket.FormId).Scan(&validatorIDs)
 

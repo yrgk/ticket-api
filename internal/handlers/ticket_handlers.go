@@ -75,7 +75,10 @@ func CheckTicketHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("validator id have not found")
 	}
 
-	ticket := repository.CheckTicket(ticketId, validatorId)
+	ticket, err := repository.CheckTicket(ticketId, validatorId)
+	if err != nil {
+		return c.SendStatus(fiber.StatusForbidden)
+	}
 
 	return c.JSON(ticket)
 }
