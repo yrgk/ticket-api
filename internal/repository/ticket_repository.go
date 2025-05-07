@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"ticket-api/internal/models"
 	"ticket-api/internal/utils"
@@ -11,15 +12,32 @@ import (
 )
 
 func TakeTicket(body models.Ticket) error {
-	if err := postgres.DB.Create(&body).Error; err != nil {
+	tx := postgres.DB.Begin()
+
+	// Trying to increase particicpants count
+	result := tx.Exec(`
+		UPDATE forms
+		SET participants_count = participants_count + 1
+		WHERE id = ? AND participants_count < participants_limit
+	`, body.FormId)
+
+	if result.Error != nil {
+		tx.Rollback()
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		tx.Rollback()
+		return fmt.Errorf("limit reached for this form")
+	}
+
+	// Creating ticket
+	if err := tx.Create(&body).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	if err := postgres.DB.Exec("UPDATE forms SET participants_count = participants_count + 1 WHERE id = ?", body.FormId).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func GetTicket(id string, userId int) models.TicketResponse {

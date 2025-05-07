@@ -21,9 +21,6 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	// Making a public id for ticket
 	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.FormId, body.Variety, time.Now()))
 
-	// Making an object name (key) for S3
-	// objectName := utils.GetMD5Hash(fmt.Sprintf("%s%s", ticketId, config.Config.Password))
-
 	// Making a QR-code url in S3 (content of qr code: https://t.me/botname/app?startapp=check=ticketId)
 	qrCode, err := utils.CreateQrCode(body, ticketId)
 	if err != nil {
@@ -47,7 +44,7 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	}
 
 	// SEND MESSAGE FROM BOT ABOUT TAKING A TICKET
-	if err := bot.SendTicketInChat(body.UserId, ticketId); err != nil {
+	if err := bot.SendTicketInChat(body.UserId, body.FormId, ticketId); err != nil {
 		return c.Status(fiber.StatusConflict).SendString("bot does not sent a message")
 	}
 

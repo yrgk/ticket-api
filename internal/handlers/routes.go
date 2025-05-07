@@ -38,5 +38,5 @@ func SetupRoutes(app *fiber.App) {
 	v1.Post("/ticket/pay", PayTicketHandler)
 
 	// Export registrations data to excel file
-	v1.Post("/export/:id", ExportDataToExcel)
+	v1.Get("/export/:id", ExportDataToExcelHandler)
 }
