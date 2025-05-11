@@ -23,6 +23,7 @@ type (
 	FormResponse struct {
 		ID     uint            `json:"id"`
 		Title  string          `json:"title"`
+		IsFull bool            `json:"is_full"`
 		Fields []FieldResponse `json:"fields"`
 	}
 

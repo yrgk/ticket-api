@@ -24,34 +24,40 @@ func CreateForm(body models.FormRequest) error {
 		return err
 	}
 
-	// Adding form id to every field
-	for i := range body.Fields {
-		body.Fields[i].FormId = form.ID
+	// Check if there is no fields
+	if len(body.Fields) != 0 {
+		// Adding form id to every field
+		for i := range body.Fields {
+			body.Fields[i].FormId = form.ID
+		}
+
+		// Creating field records in DB
+		if err := postgres.DB.Create(&body.Fields).Error; err != nil {
+			return err
+		}
 	}
 
-	// Creating field records in DB
-	if err := postgres.DB.Create(&body.Fields).Error; err != nil {
-		return err
-	}
 
 	return nil
 }
 
 func GetForm(publicId string) models.FormResponse {
-	var data struct {
-		Id    uint   `json:"id"`
-		Title string `json:"title"`
-	}
+	var form models.Form
 
-	postgres.DB.Raw("SELECT id, title FROM forms WHERE public_id = ?", publicId).Scan(&data)
+	postgres.DB.Raw("SELECT id, participants_count, participants_limit, title FROM forms WHERE public_id = ?", publicId).Scan(&form)
 
 	var fields []models.FieldResponse
-	postgres.DB.Raw("SELECT name, type FROM fields WHERE form_id = ?", data.Id).Scan(&fields)
+	postgres.DB.Raw("SELECT name, type FROM fields WHERE form_id = ?", form.ID).Scan(&fields)
 
 	response := models.FormResponse{
-		ID: data.Id,
-		Title:  data.Title,
+		ID:     form.ID,
+		Title:  form.Title,
+		IsFull: false,
 		Fields: fields,
+	}
+
+	if form.ParticipantsCount >= form.ParticipantsLimit {
+		response.IsFull = true
 	}
 
 	return response

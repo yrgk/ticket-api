@@ -10,13 +10,16 @@ import (
 
 func SendTicketInChat(userId, formId int, ticketId string) error {
 	var form models.Form
-	postgres.DB.Raw("SELECT title FROM forms WHERE id = ?", formId).Scan(&form)
+	postgres.DB.Raw("SELECT title, public_id FROM forms WHERE id = ?", formId).Scan(&form)
 
-	text := fmt.Sprintf("✅ Регистрация прошла успешно! %s", form.Title)
+	url := fmt.Sprintf("%s?startapp=ticket_%s", config.Config.WebappName, ticketId)
 
-	url := fmt.Sprintf("%s/ticket/%s?user_id=%d", config.Config.ClientUrl, ticketId, userId)
+	text := fmt.Sprintf("✅ Регистрация прошла успешно! %s %s", form.Title, url)
 
-	req := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s&reply_markup={\"inline_keyboard\":[[{\"text\":\"Открыть\",\"web_app\":{\"url\":\"%s\"}}]]}", config.Config.BotToken, userId, text, url)
+	// url := fmt.Sprintf("%s/ticket/%s?user_id=%d", config.Config.ClientUrl, ticketId, userId)
+
+	// req := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s&reply_markup={\"inline_keyboard\":[[{\"text\":\"Открыть\",\"web_app\":{\"url\":\"%s\"}}]]}", config.Config.BotToken, userId, text, url)
+	req := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", config.Config.BotToken, userId, text)
 
 	_, err := http.Get(req)
 	if err != nil {
