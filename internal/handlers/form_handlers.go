@@ -13,6 +13,8 @@ func CreateFormHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
+	// TODO: add layouts and varieties
+
 	if err := repository.CreateForm(body); err != nil {
 		return c.Status(fiber.StatusConflict).SendString(err.Error())
 	}
