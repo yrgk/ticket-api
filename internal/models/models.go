@@ -35,4 +35,20 @@ type (
 		ValidatorId int  `json:"validator_id" validate:"required"`
 		EventId     uint `json:"event_id" validate:"required"`
 	}
+
+	Variety struct {
+		FormId   int    `json:"form_id"`
+		Title    string `json:"title"`
+		CoverUrl string `json:"cover_url"`
+		Price    int    `json:"price"`
+	}
+
+	Layout struct {
+		gorm.Model
+		Title  string
+		Type   string
+		FormId int
+		Schema json.RawMessage `gorm:"type:jsonb"`
+		Zones  json.RawMessage `gorm:"type:jsonb"`
+	}
 )

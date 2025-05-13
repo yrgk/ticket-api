@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type (
 	FormRequest struct {
@@ -21,10 +23,12 @@ type (
 	}
 
 	FormResponse struct {
-		ID     uint            `json:"id"`
-		Title  string          `json:"title"`
-		IsFull bool            `json:"is_full"`
-		Fields []FieldResponse `json:"fields"`
+		ID        uint            `json:"id"`
+		Title     string          `json:"title"`
+		IsFull    bool            `json:"is_full"`
+		Fields    []FieldResponse `json:"fields"`
+		Varieties []Variety       `json:"varieties"`
+		Hall      Layout          `json:"hall"`
 	}
 
 	Field struct {

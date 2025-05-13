@@ -5,7 +5,7 @@ import (
 
 	"ticket-api/config"
 	"ticket-api/internal/handlers"
-	// "ticket-api/internal/models"
+	"ticket-api/internal/models"
 	// "ticket-api/pkg/clickhouse"
 	"ticket-api/pkg/postgres"
 
@@ -22,19 +22,21 @@ func main()  {
 	postgres.ConnectDb()
 
 	log.Println("Tables migrated")
-	// postgres.DB.AutoMigrate(
-	// 	models.Form{},
-	// 	models.Field{},
-	// 	models.Ticket{},
-	// 	models.TicketMeta{},
-	// 	// models.Validator{},
-	// )
+	postgres.DB.AutoMigrate(
+		models.Form{},
+		models.Field{},
+		models.Ticket{},
+		models.TicketMeta{},
+		models.Layout{},
+		models.Variety{},
+		// models.Validator{},
+	)
 
 	// clickhouse.InitClickhouse()
 
 	log.Println("App inited")
 	app := fiber.New(fiber.Config{
-		Prefork: true,
+		// Prefork: true,
 	})
 
 	// Setting up CORS

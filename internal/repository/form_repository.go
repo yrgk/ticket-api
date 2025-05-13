@@ -37,7 +37,6 @@ func CreateForm(body models.FormRequest) error {
 		}
 	}
 
-
 	return nil
 }
 
@@ -52,11 +51,19 @@ func GetForm(publicId string) models.FormResponse {
 		fields = []models.FieldResponse{}
 	}
 
+	var varieties []models.Variety
+	postgres.DB.Raw("SELECT title, cover_url, price FROM varieties WHERE form_id = ?", form.ID).Scan(&varieties)
+
+	var hall models.Layout
+	postgres.DB.Raw("SELECT * FROM layouts WHERE form_id = ?", form.ID).Scan(&hall)
+
 	response := models.FormResponse{
-		ID:     form.ID,
-		Title:  form.Title,
-		IsFull: false,
-		Fields: fields,
+		ID:        form.ID,
+		Title:     form.Title,
+		IsFull:    false,
+		Fields:    fields,
+		Varieties: varieties,
+		Hall:      hall,
 	}
 
 	if form.ParticipantsCount >= form.ParticipantsLimit {
