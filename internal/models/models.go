@@ -37,6 +37,7 @@ type (
 	}
 
 	Variety struct {
+		ID       uint   `json:"id" gorm:"primarykey"`
 		FormId   int    `json:"form_id"`
 		Title    string `json:"title"`
 		CoverUrl string `json:"cover_url"`

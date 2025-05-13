@@ -52,7 +52,7 @@ func GetForm(publicId string) models.FormResponse {
 	}
 
 	var varieties []models.Variety
-	postgres.DB.Raw("SELECT title, cover_url, price FROM varieties WHERE form_id = ?", form.ID).Scan(&varieties)
+	postgres.DB.Raw("SELECT id, title, cover_url, price FROM varieties WHERE form_id = ?", form.ID).Scan(&varieties)
 
 	var hall models.Layout
 	postgres.DB.Raw("SELECT * FROM layouts WHERE form_id = ?", form.ID).Scan(&hall)
