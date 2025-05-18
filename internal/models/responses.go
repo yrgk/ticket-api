@@ -37,9 +37,9 @@ type (
 	}
 
 	LayoutResponse struct {
-		Title  string
-		Type   string
-		Schema json.RawMessage `gorm:"type:jsonb"`
-		Zones  json.RawMessage `gorm:"type:jsonb"`
+		Title  string          `json:"title"`
+		Type   string          `json:"type"`
+		Schema json.RawMessage `json:"schema" gorm:"type:jsonb"`
+		Zones  json.RawMessage `json:"zones" gorm:"type:jsonb"`
 	}
 )
