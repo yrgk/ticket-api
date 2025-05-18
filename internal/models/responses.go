@@ -1,20 +1,23 @@
 package models
 
+import "encoding/json"
+
 type (
 	TicketResponse struct {
-		Title       string `json:"title"`
-		QrCodeUrl   string `json:"qr_code_url"`
-		FormId      int    `json:"form_id"`
-		Variety     string `json:"variety"`
-		IsActivated bool   `json:"is_activated"`
+		ID          uint    `json:"id"`
+		Title       string  `json:"title"`
+		QrCodeUrl   string  `json:"qr_code_url"`
+		FormId      int     `json:"form_id"`
+		Variety     Variety `json:"variety"`
+		IsActivated bool    `json:"is_activated"`
 	}
 
 	MyTicketResponse struct {
-		Title       string `json:"title"`
-		CoverUrl    string `json:"cover_url"`
-		TicketId    string `json:"ticket_id"`
-		Variety     string `json:"variety"`
-		IsActivated bool   `json:"is_activated"`
+		Title    string `json:"title"`
+		CoverUrl string `json:"cover_url"`
+		TicketId string `json:"ticket_id"`
+		// Variety     int `json:"variety_id"`
+		IsActivated bool `json:"is_activated"`
 	}
 
 	MyProjectsResponse struct {
@@ -29,7 +32,14 @@ type (
 	TicketCheckResponse struct {
 		Title       string `json:"title"`
 		IsActivated bool   `json:"is_activated"`
-		Variety     string `json:"variety"`
+		VarietyId   int    `json:"variety_id"`
 		// UserId      int  `json:"user_id"`
+	}
+
+	LayoutResponse struct {
+		Title  string
+		Type   string
+		Schema json.RawMessage `gorm:"type:jsonb"`
+		Zones  json.RawMessage `gorm:"type:jsonb"`
 	}
 )

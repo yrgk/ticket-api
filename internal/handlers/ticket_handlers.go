@@ -19,7 +19,7 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	}
 
 	// Making a public id for ticket
-	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%s%v", body.UserId, body.FormId, body.Variety, time.Now()))
+	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%d%v", body.UserId, body.FormId, body.VarietyId, time.Now()))
 
 	// Making a QR-code url in S3 (content of qr code: https://t.me/botname/app?startapp=check=ticketId)
 	qrCode, err := utils.CreateQrCode(body, ticketId)
@@ -32,6 +32,7 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 		UserId:    body.UserId,
 		FormId:    body.FormId,
 		TicketId:  ticketId,
+		VarietyId: body.VarietyId,
 	}
 
 	if err := repository.TakeTicket(ticketBody); err != nil {

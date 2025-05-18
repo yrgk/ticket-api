@@ -10,6 +10,7 @@ type (
 		Title             string  `json:"title"`
 		Fields            []Field `json:"fields"`
 		ParticipantsLimit int     `json:"participants_limit"`
+		AccountLimit      int     `json:"account_limit"`
 		UserId            int     `json:"user_id"`
 	}
 
@@ -19,6 +20,7 @@ type (
 		PublicId          string `json:"public_id"` // Visible id in type of hashed string
 		ParticipantsCount int    `json:"participants_count"`
 		ParticipantsLimit int    `json:"participants_limit"`
+		AccountLimit      int    `json:"account_limit"`
 		UserId            int    `json:"user_id"`
 	}
 
@@ -28,7 +30,7 @@ type (
 		IsFull    bool            `json:"is_full"`
 		Fields    []FieldResponse `json:"fields"`
 		Varieties []Variety       `json:"varieties"`
-		Hall      Layout          `json:"hall"`
+		Layout    LayoutResponse  `json:"layout"`
 	}
 
 	Field struct {

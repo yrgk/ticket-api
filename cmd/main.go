@@ -24,11 +24,12 @@ func main()  {
 	log.Println("Tables migrated")
 	postgres.DB.AutoMigrate(
 		models.Form{},
-		models.Field{},
-		models.Ticket{},
-		models.TicketMeta{},
-		models.Layout{},
-		models.Variety{},
+		// models.Field{},
+		// models.Ticket{},
+		// models.TicketMeta{},
+		// models.Layout{},
+		// models.Variety{},
+		
 		// models.Validator{},
 	)
 

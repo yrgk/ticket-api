@@ -14,7 +14,7 @@ type (
 		UserId      int    `json:"user_id"`
 		FormId      int    `json:"form_id"`
 		TicketId    string `json:"ticket_id"`
-		Variety     string `json:"variety"`
+		VarietyId   int    `json:"variety_id"`
 		IsActivated bool   `json:"is_activated"`
 	}
 
@@ -24,7 +24,7 @@ type (
 		UserId        int             `json:"user_id"`
 		FormId        int             `json:"form_id"`
 		TicketId      string          `json:"ticket_id"`
-		Variety       string          `json:"variety"`
+		// Variety       string          `json:"variety"`
 		IsActivated   bool            `json:"is_activated"`
 		TimeBought    time.Time       `json:"time_bought"`
 		TimeActivated time.Time       `json:"time_activated"`

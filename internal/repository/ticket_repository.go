@@ -44,6 +44,11 @@ func GetTicket(id string, userId int) models.TicketResponse {
 	var ticket models.TicketResponse
 	postgres.DB.Raw("SELECT f.title, t.qr_code_url, t.form_id, t.variety, t.is_activated FROM forms f, tickets t WHERE t.ticket_id = ? AND t.user_id = ? AND f.id = t.form_id;", id, userId).Scan(&ticket)
 
+	var variety models.Variety
+	postgres.DB.Raw("SELECT * FROM varieties WHERE form_id = ?", ticket.ID)
+
+	ticket.Variety = variety
+
 	return ticket
 }
 
@@ -56,7 +61,7 @@ func GetTicketForChecking(id string, userId int) models.TicketCheckResponse {
 
 func CheckTicket(ticketId string, validatorId int) (models.TicketCheckResponse, error) {
 	var ticket models.Ticket
-	postgres.DB.Raw("SELECT form_id, is_activated, variety FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
+	postgres.DB.Raw("SELECT form_id, is_activated, variety_id FROM tickets WHERE ticket_id = ?", ticketId).Scan(&ticket)
 
 	var form models.Form
 	postgres.DB.Raw("SELECT title, user_id FROM forms WHERE id = ?", ticket.FormId).Scan(&form)
@@ -69,7 +74,7 @@ func CheckTicket(ticketId string, validatorId int) (models.TicketCheckResponse, 
 	response := models.TicketCheckResponse{
 		Title:       form.Title,
 		IsActivated: ticket.IsActivated,
-		Variety:     ticket.Variety,
+		VarietyId:   ticket.VarietyId,
 	}
 
 	return response, nil
@@ -103,7 +108,7 @@ func ValidateTicket(ticketId string, userId int) error {
 
 func GetMyTickets(id int) []models.MyTicketResponse {
 	var tickets []models.MyTicketResponse
-	postgres.DB.Raw("SELECT t.variety, t.ticket_id, t.is_activated, f.title FROM tickets t JOIN forms f ON t.form_id = f.id WHERE t.user_id = ?", id).Scan(&tickets)
+	postgres.DB.Raw("SELECT t.variety_id, t.ticket_id, t.is_activated, f.title FROM tickets t JOIN forms f ON t.form_id = f.id WHERE t.user_id = ?", id).Scan(&tickets)
 
 	return tickets
 }
@@ -125,7 +130,6 @@ func UploadUserData(body models.Ticket, ticketBody models.TakeTicketRequest) err
 		UserId:     body.UserId,
 		FormId:     body.FormId,
 		TicketId:   body.TicketId,
-		Variety:    body.Variety,
 		TimeBought: time.Now(),
 		UserData:   formData,
 	}
