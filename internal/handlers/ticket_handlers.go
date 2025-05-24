@@ -18,6 +18,13 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.ErrBadRequest.Code).SendString(err.Error())
 	}
 
+	isLimit := repository.CheckLimit(body.FormId, body.UserId)
+
+	if isLimit {
+		return c.Status(fiber.StatusConflict).SendString("limit for account is reached")
+	}
+
+	t := time.Now()
 	// Making a public id for ticket
 	ticketId := utils.GetMD5Hash(fmt.Sprintf("%d%d%d%v", body.UserId, body.FormId, body.VarietyId, time.Now()))
 
@@ -26,29 +33,35 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusConflict).SendString(err.Error())
 	}
+	fmt.Println("QR CODE", time.Since(t))
+
+	form := repository.GetFormById(body.FormId)
+
+	seed := fmt.Sprintf("#%d/%d %s", form.ParticipantsCount+1, form.ParticipantsLimit, ticketId)
+
+	cover, err := repository.MakeCover(seed, ticketId)
+	if err != nil {
+		return c.SendStatus(fiber.StatusConflict)
+	}
 
 	ticketBody := models.Ticket{
-		QrCodeUrl: qrCode,
-		UserId:    body.UserId,
-		FormId:    body.FormId,
-		TicketId:  ticketId,
-		VarietyId: body.VarietyId,
+		QrCodeUrl:    qrCode,
+		CoverUrl:     cover,
+		UserId:       body.UserId,
+		FormId:       body.FormId,
+		TicketNumber: form.ParticipantsCount + 1,
+		TicketId:     ticketId,
+		VarietyId:    body.VarietyId,
 	}
 
 	if err := repository.TakeTicket(ticketBody); err != nil {
 		return c.Status(fiber.StatusConflict).SendString("form is full")
 	}
 
-	// ADD FORM DATA TO CLICKHOUSE
-	if err := repository.UploadUserData(ticketBody, body); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).SendString(err.Error())
-	}
-
 	// SEND MESSAGE FROM BOT ABOUT TAKING A TICKET
 	if err := bot.SendTicketInChat(body.UserId, body.FormId, ticketId); err != nil {
 		return c.Status(fiber.StatusConflict).SendString("bot does not sent a message")
 	}
-
 	return c.SendStatus(fiber.StatusOK)
 }
 

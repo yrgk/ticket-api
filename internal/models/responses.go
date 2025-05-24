@@ -4,12 +4,15 @@ import "encoding/json"
 
 type (
 	TicketResponse struct {
-		ID          uint    `json:"id"`
-		Title       string  `json:"title"`
-		QrCodeUrl   string  `json:"qr_code_url"`
-		FormId      int     `json:"form_id"`
-		Variety     Variety `json:"variety"`
-		IsActivated bool    `json:"is_activated"`
+		ID                uint    `json:"id"`
+		Title             string  `json:"title"`
+		QrCodeUrl         string  `json:"qr_code_url"`
+		CoverUrl          string  `json:"cover_url"`
+		TicketNumber      int     `json:"ticket_number"`
+		ParticipantsLimit int     `json:"participants_limit"`
+		FormId            int     `json:"form_id"`
+		Variety           Variety `json:"variety"`
+		IsActivated       bool    `json:"is_activated"`
 	}
 
 	MyTicketResponse struct {

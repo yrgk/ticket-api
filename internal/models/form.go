@@ -25,12 +25,23 @@ type (
 	}
 
 	FormResponse struct {
-		ID        uint            `json:"id"`
-		Title     string          `json:"title"`
-		IsFull    bool            `json:"is_full"`
-		Fields    []FieldResponse `json:"fields"`
-		Varieties []Variety       `json:"varieties"`
-		Layout    LayoutResponse  `json:"layout"`
+		ID           uint            `json:"id"`
+		Title        string          `json:"title"`
+		IsFull       bool            `json:"is_full"`
+		AccountLimit int             `json:"account_limit"`
+		Fields       []FieldResponse `json:"fields"`
+		Varieties    []Variety       `json:"varieties"`
+		Layout       LayoutResponse  `json:"layout"`
+	}
+
+	MyFormResponse struct {
+		ID           uint            `json:"id"`
+		Title        string          `json:"title"`
+		IsFull       bool            `json:"is_full"`
+		AccountLimit int             `json:"account_limit"`
+		Fields       []FieldResponse `json:"fields"`
+		Varieties    []Variety       `json:"varieties"`
+		Layout       LayoutResponse  `json:"layout"`
 	}
 
 	Field struct {

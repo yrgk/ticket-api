@@ -44,7 +44,7 @@ func CreateForm(body models.FormRequest) error {
 func GetForm(publicId string) models.FormResponse {
 	var form models.Form
 
-	postgres.DB.Raw("SELECT id, participants_count, participants_limit, title FROM forms WHERE public_id = ?", publicId).Scan(&form)
+	postgres.DB.Raw("SELECT id, participants_count, participants_limit, account_limit, title FROM forms WHERE public_id = ?", publicId).Scan(&form)
 
 	var fields []models.FieldResponse
 	postgres.DB.Raw("SELECT name, type FROM fields WHERE form_id = ?", form.ID).Scan(&fields)
@@ -62,12 +62,13 @@ func GetForm(publicId string) models.FormResponse {
 	postgres.DB.Raw("SELECT title, type, schema, zones FROM layouts WHERE form_id = ?", form.ID).Scan(&layout)
 
 	response := models.FormResponse{
-		ID:        form.ID,
-		Title:     form.Title,
-		IsFull:    false,
-		Fields:    fields,
-		Varieties: varieties,
-		Layout:    layout,
+		ID:           form.ID,
+		Title:        form.Title,
+		IsFull:       false,
+		AccountLimit: form.AccountLimit,
+		Fields:       fields,
+		Varieties:    varieties,
+		Layout:       layout,
 	}
 
 	if form.ParticipantsCount >= form.ParticipantsLimit {
@@ -75,6 +76,27 @@ func GetForm(publicId string) models.FormResponse {
 	}
 
 	return response
+}
+
+func CheckLimit(formId int, userId int) bool {
+	var accountLimit int
+	var userTickets int
+
+	// Получаем лимит из таблицы forms
+	postgres.DB.Raw("SELECT account_limit FROM forms WHERE id = ?", formId).Scan(&accountLimit)
+
+	// Считаем количество билетов пользователя на данную форму
+	postgres.DB.Raw("SELECT COUNT(*) FROM tickets WHERE form_id = ? AND user_id = ?", formId, userId).Scan(&userTickets)
+
+	// Проверяем, достигнут ли лимит
+	return userTickets >= accountLimit
+}
+
+func GetFormById(id int) models.Form {
+	var form models.Form
+	postgres.DB.First(&form, id)
+
+	return form
 }
 
 func GetMyProjects(userId string) models.MyProjectsResponse {

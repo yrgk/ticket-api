@@ -1,14 +1,38 @@
 package repository
 
 import (
-	"encoding/json"
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"time"
+
+	"encoding/hex"
+	// "encoding/json"
 	"errors"
 	"fmt"
+	"image/color"
+	"image/png"
 	"log"
+	"math/rand"
+
+	// "time"
+
+	"image"
+	// "image/color"
+	// "image/draw"
+	// "math/rand"
+
+	"github.com/disintegration/gift"
+
+	"ticket-api/config"
 	"ticket-api/internal/models"
 	"ticket-api/internal/utils"
 	"ticket-api/pkg/postgres"
-	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	s3 "github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/fogleman/gg"
 )
 
 func TakeTicket(body models.Ticket) error {
@@ -42,7 +66,7 @@ func TakeTicket(body models.Ticket) error {
 
 func GetTicket(id string, userId int) models.TicketResponse {
 	var ticket models.TicketResponse
-	postgres.DB.Raw("SELECT f.title, t.qr_code_url, t.form_id, t.variety, t.is_activated FROM forms f, tickets t WHERE t.ticket_id = ? AND t.user_id = ? AND f.id = t.form_id;", id, userId).Scan(&ticket)
+	postgres.DB.Raw("SELECT f.title, t.qr_code_url, t.cover_url, t.ticket_number, f.participants_limit, t.form_id, t.variety, t.is_activated FROM forms f, tickets t WHERE t.ticket_id = ? AND t.user_id = ? AND f.id = t.form_id;", id, userId).Scan(&ticket)
 
 	var variety models.Variety
 	postgres.DB.Raw("SELECT * FROM varieties WHERE form_id = ?", ticket.ID)
@@ -108,7 +132,7 @@ func ValidateTicket(ticketId string, userId int) error {
 
 func GetMyTickets(id int) []models.MyTicketResponse {
 	var tickets []models.MyTicketResponse
-	postgres.DB.Raw("SELECT t.variety_id, t.ticket_id, t.is_activated, f.title FROM tickets t JOIN forms f ON t.form_id = f.id WHERE t.user_id = ?", id).Scan(&tickets)
+	postgres.DB.Raw("SELECT t.variety_id, t.ticket_id, t.is_activated, t.cover_url, f.title FROM tickets t JOIN forms f ON t.form_id = f.id WHERE t.user_id = ?", id).Scan(&tickets)
 
 	return tickets
 }
@@ -120,23 +144,112 @@ func CheckValidator(eventId, validatorId int) bool {
 	return validator.EventId != 0
 }
 
-func UploadUserData(body models.Ticket, ticketBody models.TakeTicketRequest) error {
-	formData, err := json.Marshal(ticketBody.FormData)
+// func UploadUserData(body models.Ticket, ticketBody models.TakeTicketRequest) error {
+// 	formData, err := json.Marshal(ticketBody.FormData)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	data := models.TicketMeta{
+// 		UserId:   body.UserId,
+// 		FormId:   body.FormId,
+// 		TicketId: body.TicketId,
+// 		UserData:   formData,
+// 	}
+
+// 	if err := postgres.DB.Create(&data).Error; err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+const (
+	width     = 512
+	height    = 512
+	blobCount = 5
+)
+
+func hexToColor(hexStr string) color.Color {
+	r, _ := hex.DecodeString(hexStr[0:2])
+	g, _ := hex.DecodeString(hexStr[2:4])
+	b, _ := hex.DecodeString(hexStr[4:6])
+	return color.RGBA{r[0], g[0], b[0], 180}
+}
+
+func getColorsFromHash(hash string, count int) []color.Color {
+	var colors []color.Color
+	for i := 0; i < count; i++ {
+		start := i * 6
+		colors = append(colors, hexToColor(hash[start:start+6]))
+	}
+	return colors
+}
+
+func MakeCover(seed, ticketId string) (string, error) {
+	// Генерация хэша и цветов
+	hash := sha256.Sum256([]byte(seed))
+	hashStr := hex.EncodeToString(hash[:])
+	colors := getColorsFromHash(hashStr, blobCount)
+	rng := rand.New(rand.NewSource(int64(hash[0])))
+
+	// Создаем canvas
+	dc := gg.NewContext(width, height)
+	// dc.SetRGB(0.1, 0.1, 0.2) // фон
+	dc.SetRGB(0.7, 0.7, 0.7) // фон
+	dc.Clear()
+
+	for _, c := range colors {
+		r := rng.Float64()*300 + 200
+		x := rng.Float64() * width
+		y := rng.Float64() * height
+		grad := gg.NewRadialGradient(x, y, 0, x, y, r)
+		rgba := c.(color.RGBA)
+		grad.AddColorStop(0, color.RGBA{rgba.R, rgba.G, rgba.B, 200})
+		grad.AddColorStop(1, color.RGBA{rgba.R, rgba.G, rgba.B, 0})
+		dc.SetFillStyle(grad)
+		dc.DrawCircle(x, y, r)
+		dc.Fill()
+	}
+
+	// Преобразуем в image.Image и применяем размытие
+	src := dc.Image()
+	dst := image.NewRGBA(src.Bounds())
+
+	g := gift.New(
+		gift.GaussianBlur(100.0), // Уровень размытия
+	)
+	g.Draw(dst, src)
+
+	// Кодируем в PNG
+	var buf bytes.Buffer
+	err := png.Encode(&buf, dst)
 	if err != nil {
-		return err
+		return "", fmt.Errorf("failed to encode image: %w", err)
 	}
 
-	data := models.TicketMeta{
-		UserId:     body.UserId,
-		FormId:     body.FormId,
-		TicketId:   body.TicketId,
-		TimeBought: time.Now(),
-		UserData:   formData,
+	// Получаем S3 клиент
+	client, err := utils.GetS3Client()
+	if err != nil {
+		return "", fmt.Errorf("failed to get s3 client: %w", err)
 	}
 
-	if err := postgres.DB.Create(&data).Error; err != nil {
-		return err
+	s := time.Now()
+	// Ключ и загрузка
+	key := fmt.Sprintf("covers/%s.png", ticketId)
+	_, err = client.PutObject(context.Background(), &s3.PutObjectInput{
+		Bucket:      aws.String(config.Config.BucketName),
+		Key:         aws.String(key),
+		Body:        bytes.NewReader(buf.Bytes()),
+		ContentType: aws.String("image/png"),
+		ACL:         types.ObjectCannedACLPublicRead,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to upload image: %w", err)
 	}
 
-	return nil
+	link := fmt.Sprintf("%s/%s/%s", config.Config.S3ApiUrl, config.Config.BucketName, key)
+
+	fmt.Println("UPLOADING", time.Since(s))
+	return link, nil
 }
