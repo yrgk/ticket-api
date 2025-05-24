@@ -66,7 +66,7 @@ func TakeTicket(body models.Ticket) error {
 
 func GetTicket(id string, userId int) models.TicketResponse {
 	var ticket models.TicketResponse
-	postgres.DB.Raw("SELECT f.title, t.qr_code_url, t.cover_url, t.ticket_number, f.participants_limit, t.form_id, t.variety, t.is_activated FROM forms f, tickets t WHERE t.ticket_id = ? AND t.user_id = ? AND f.id = t.form_id;", id, userId).Scan(&ticket)
+	postgres.DB.Raw("SELECT f.title, t.qr_code_url, t.cover_url, t.ticket_number, f.participants_limit, t.form_id, t.is_activated FROM forms f, tickets t WHERE t.ticket_id = ? AND t.user_id = ? AND f.id = t.form_id;", id, userId).Scan(&ticket)
 
 	var variety models.Variety
 	postgres.DB.Raw("SELECT * FROM varieties WHERE form_id = ?", ticket.ID)
