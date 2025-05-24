@@ -16,11 +16,12 @@ type (
 	}
 
 	MyTicketResponse struct {
-		Title    string `json:"title"`
-		CoverUrl string `json:"cover_url"`
-		TicketId string `json:"ticket_id"`
-		// Variety     int `json:"variety_id"`
-		IsActivated bool `json:"is_activated"`
+		Title             string `json:"title"`
+		CoverUrl          string `json:"cover_url"`
+		TicketId          string `json:"ticket_id"`
+		TicketNumber      int    `json:"ticket_number"`
+		ParticipantsLimit int    `json:"participants_limit"`
+		IsActivated       bool   `json:"is_activated"`
 	}
 
 	MyProjectsResponse struct {

@@ -132,7 +132,7 @@ func ValidateTicket(ticketId string, userId int) error {
 
 func GetMyTickets(id int) []models.MyTicketResponse {
 	var tickets []models.MyTicketResponse
-	postgres.DB.Raw("SELECT t.variety_id, t.ticket_id, t.is_activated, t.cover_url, f.title FROM tickets t JOIN forms f ON t.form_id = f.id WHERE t.user_id = ?", id).Scan(&tickets)
+	postgres.DB.Raw("SELECT t.variety_id, t.ticket_id, t.is_activated, t.cover_url, t.ticket_number, f.participants_limit, f.title FROM tickets t JOIN forms f ON t.form_id = f.id WHERE t.user_id = ?", id).Scan(&tickets)
 
 	return tickets
 }
