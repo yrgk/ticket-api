@@ -31,6 +31,7 @@ func TakeTicketHandler(c *fiber.Ctx) error {
 	// Making a QR-code url in S3 (content of qr code: https://t.me/botname/app?startapp=check=ticketId)
 	qrCode, err := utils.CreateQrCode(body, ticketId)
 	if err != nil {
+		fmt.Println("error: ", err.Error())
 		return c.Status(fiber.StatusConflict).SendString(err.Error())
 	}
 	fmt.Println("QR CODE", time.Since(t))
